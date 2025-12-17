@@ -83,15 +83,18 @@ export async function syncRectoratData() {
       // if the card already exists and matches a fetched one skip it
       if (existing && 
         existing.resource === card.image &&
-        existing.title === cleanTitle &&
-        existing.subtitle === subtitleContent
+        existing.title_ua === cleanTitle &&
+        existing.subtitle_ua === subtitleContent
       ) continue;
 
       const memberCard: InfoCard = {
         id: card.id,
-        title: cleanTitle, 
-        subtitle: subtitleContent,
-        content: "", 
+        title_ua: cleanTitle, 
+        title_en: "",
+        subtitle_ua: subtitleContent,
+        subtitle_en: "",
+        content_ua: "", 
+        content_en: "",
         image: card.image ? await downloadedAsset(card.image, "rectorat") : DEFAULT_IMAGE,
         category: TARGET_CATEGORY,
         subcategory: null,
@@ -103,7 +106,13 @@ export async function syncRectoratData() {
       updatedCount++;
 
       if (existing) {
-        await infoCards.update({...existing, ...memberCard, published: existing.published });
+        await infoCards.update({
+          ...existing,
+          ...memberCard, 
+          title_en: existing.title_en || "",
+          subtitle_en: existing.subtitle_en || "",
+          content_en: existing.content_en || "",
+          published: existing.published });
       } else {
         await infoCards.create(memberCard);
       }

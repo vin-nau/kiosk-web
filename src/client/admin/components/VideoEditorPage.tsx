@@ -17,7 +17,14 @@ export function VideoEditorPage() {
   const navigate = useNavigate();
   const isEditMode = Boolean(id);
 
-  const [formData, setFormData] = useState<Video>({...loadedVideo});
+  const [formData, setFormData] = useState<Video>({
+    ...loadedVideo,
+    title_ua: loadedVideo?.title_ua || (loadedVideo as any)?.title || '', 
+    title_en: loadedVideo?.title_en || '',
+    
+    description_ua: loadedVideo?.description_ua || (loadedVideo as any)?.description || '', 
+    description_en: loadedVideo?.description_en || ''
+  });
 
   const [videoFile, setVideoFile] = useState<File & PreviewFile | null>(null);
   const [imageFile, setImageFile] = useState<File & PreviewFile | null>(null);
@@ -129,7 +136,7 @@ export function VideoEditorPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.title || !formData.category) {
+    if (!formData.title_ua || !formData.category) {
       toast.error('Заповніть всі обов\'язкові поля');
       return;
     }
@@ -143,9 +150,11 @@ export function VideoEditorPage() {
       setSaving(true);
 
       const formDataToSend = new FormData();
-      formDataToSend.append('title', formData.title);
+      formDataToSend.append('title_ua', formData.title_ua);
+      formDataToSend.append('title_en', formData.title_en || "");
       formDataToSend.append('category', formData.category);
-      formDataToSend.append('description', formData.description || '');
+      formDataToSend.append('description_ua', formData.description_ua || "");
+      formDataToSend.append('description_en', formData.description_en || "");
       formDataToSend.append('published', formData.published ? 'true' : 'false');
 
       if (videoFile) {
@@ -221,9 +230,9 @@ export function VideoEditorPage() {
     try {
       setSaving(true);
       const formDataToSend = new FormData();
-      formDataToSend.append('title', formData.title);
+      formDataToSend.append('title_ua', formData.title_ua);
       formDataToSend.append('category', formData.category);
-      formDataToSend.append('description', formData.description || '');
+      formDataToSend.append('description_ua', formData.description_ua || '');
       formDataToSend.append('published', formData.published ? 'true' : 'false');
       formDataToSend.append('removeImage', 'true');
 
@@ -250,9 +259,9 @@ export function VideoEditorPage() {
     try {
       setSaving(true);
       const formDataToSend = new FormData();
-      formDataToSend.append('title', formData.title);
+      formDataToSend.append('title', formData.title_ua);
       formDataToSend.append('category', formData.category);
-      formDataToSend.append('description', formData.description || '');
+      formDataToSend.append('description', formData.description_ua || '');
       formDataToSend.append('published', formData.published ? 'true' : 'false');
       formDataToSend.append('removeSubtitles', JSON.stringify([lang]));
 
@@ -302,14 +311,26 @@ export function VideoEditorPage() {
 
       <form id="video-form" onSubmit={handleSubmit}>
         <div>
-          <label title="Основна назва відео">Назва відео:</label>
+          <label title="Назва відео українською">Назва відео (UA):</label>
           <input
             type="text"
-            name="title"
-            value={formData.title}
+            name="title_ua"
+            value={formData.title_ua || ""}
             onChange={handleChange}
             required
-            placeholder="Введіть назву відео"
+            placeholder="Введіть назву відео українською"
+          />
+        </div>
+
+        <div>
+          <label title="Назва відео англійською">Назва відео (EN):</label>
+          <input
+            type="text"
+            name="title_en"
+            value={formData.title_en || ""}
+            onChange={handleChange}
+            required
+            placeholder="Введіть назву відео англійською"
           />
         </div>
 
@@ -424,14 +445,26 @@ export function VideoEditorPage() {
         </div>
 
         <div>
-          <label htmlFor="description">Опис:</label>
+          <label htmlFor="description_ua">Опис:</label>
           <textarea
-            id="description"
-            name="description"
-            value={formData.description}
+            id="description_ua"
+            name="description_ua"
+            value={formData.description_ua}
             onChange={handleChange}
             rows={5}
-            placeholder="Введіть опис відео"
+            placeholder="Введіть опис відео українською "
+          />
+        </div>
+
+        <div>
+          <label htmlFor="description_en">Опис:</label>
+          <textarea
+            id="description_en"
+            name="description_en"
+            value={formData.description_en}
+            onChange={handleChange}
+            rows={5}
+            placeholder="Введіть опис відео англійською "
           />
         </div>
 

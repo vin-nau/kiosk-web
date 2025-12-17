@@ -65,9 +65,13 @@ async function parseCurrentNewsPage(): Promise<InfoCard[]> {
 
         return ({
           id: `news_${id}`,
-          title: titleLinkElement.text().trim(),
+          title_ua: titleLinkElement.text().trim(),
+          title_en: "",
+          subtitle_ua: "",
+          subtitle_en: "",
           resource: link,
-          content,
+          content_ua: content,
+          content_en: "",
           image,
           category: "news",
           position: 0,
@@ -84,9 +88,9 @@ async function parseCurrentNewsPage(): Promise<InfoCard[]> {
 
 export async function syncNewsArticle(info: InfoCard): Promise<InfoCard> {
   if (!info.resource) throw new Error("Resource link is missing for the news article.");
-  const content = await loadArticleContents(info.resource);    
+  const content_ua = await loadArticleContents(info.resource);    
   
-  return {...info, content };
+  return {...info, content_ua };
 }
 
 // Load news from the public site and save to the database
@@ -99,7 +103,7 @@ export async function updateNews(): Promise<void> {
 
     if (!existing) {      
       await infoCards.create(article);
-      console.log(`Додано новину: ${article.title}`);
+      console.log(`Додано новину: ${article.title_ua}`);
     }
   })).catch((err) => {
     console.error(`Помилка при оновленні новин:`, err);

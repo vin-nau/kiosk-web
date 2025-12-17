@@ -71,8 +71,10 @@ router.post('/videos', videoUpload.fields([
 ]), async (req: Request, res: Response) => {
   const files = req.files as { [fieldname: string]: Express.Multer.File[] } | undefined;
 
-  if (!req.body.title || !req.body.category || !files?.video) {
-    return res.status(400).json({ error: 'Обов\'язкові поля: title, category, video' });
+  const titleUA = req.body.title_ua || req.body.title;
+
+  if (!titleUA || !req.body.category || !files?.video) {
+    return res.status(400).json({ error: 'Обов\'язкові поля: title_ua, category, video' });
   }
 
   const category = req.body.category as string;
@@ -99,11 +101,13 @@ router.post('/videos', videoUpload.fields([
 
   const video: Video = {
     id: crypto.randomUUID(),
-    title: req.body.title,
+    title_ua: titleUA,
+    title_en: req.body.title_en || "",
     src: videoUrl(files.video[0].filename) ?? '',
     image: files?.image ? videoPreviewUrl(files.image[0].filename) : null,
     category,
-    description: req.body.description || '',
+    description_ua: req.body.description_ua || req.body.description || "",
+    description_en: req.body.description_en || "",
     published: req.body.published === 'true' || req.body.published === true,
     position: 0
   };
@@ -210,12 +214,17 @@ router.put('/videos/:id', videoUpload.fields([
 
   const updatedVideo: Video = {
     ...existingVideo,
-    title: req.body.title || existingVideo.title,
+    
+    title_ua: req.body.title_ua || req.body.title || existingVideo.title_ua,
+    title_en: req.body.title_en || existingVideo.title_en,
+    
+    description_ua: req.body.description_ua || req.body.description || existingVideo.description_ua,
+    description_en: req.body.description_en || existingVideo.description_en,
+
     src: files?.video ? videoUrl(files.video[0].filename) ?? '' : existingVideo.src,
     image: req.body.removeImage === 'true' ? null : 
           files?.image ?  videoPreviewUrl(files.image[0].filename) ?? null : existingVideo.image,
     category,
-    description: req.body.description || existingVideo.description,
     published: req.body.published === 'true' || req.body.published === true
   };
 

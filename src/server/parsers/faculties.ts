@@ -4,8 +4,10 @@ import { infoCards } from "../db";
 import type { InfoCard } from "../../shared/models";
 
 type FacultyInfo = {
-  title: string,
-  content: string
+  title_ua: string,
+  title_en: string,
+  content_ua: string,
+  content_en: string
 };
 
 async function parseFacultyInfo(url: string): Promise<FacultyInfo> {
@@ -18,10 +20,10 @@ async function parseFacultyInfo(url: string): Promise<FacultyInfo> {
   const html = await response.text();
   const $ = cheerio.load(html);
 
-  let title = $("h1").first().text().trim();
-  title = title.replace('Факультет ', '');
-  title = title.replace('інформаційних технологій', 'ІТ');
-  title = title.charAt(0).toUpperCase() + title.slice(1);
+  let title_ua = $("h1").first().text().trim();
+  title_ua = title_ua.replace('Факультет ', '');
+  title_ua = title_ua.replace('інформаційних технологій', 'ІТ');
+  title_ua = title_ua.charAt(0).toUpperCase() + title_ua.slice(1);
 
   const selectors = [
     "div.col-lg-8.mb-3",
@@ -61,12 +63,12 @@ async function parseFacultyInfo(url: string): Promise<FacultyInfo> {
     combinedHtml = $("body").html() || "";
   }
 
-  return { title, content: combinedHtml } as FacultyInfo;
+  return { title_ua, title_en: "", content_ua: combinedHtml, content_en: "" } as FacultyInfo;
 }
 
 export async function syncFacultyInfo(faculty: InfoCard): Promise<InfoCard> {
-  const {title, content } = await parseFacultyInfo(faculty.resource!);
-  return {...faculty, title, content};
+  const { title_ua, content_ua } = await parseFacultyInfo(faculty.resource!);
+  return { ...faculty, title_ua, content_ua };
 }
 
 export async function loadAllFaculties(): Promise<void> {
@@ -78,21 +80,24 @@ export async function loadAllFaculties(): Promise<void> {
       try {
         const info = await parseFacultyInfo(faculty.resource!);
 
-        if (faculty.title != info.title) {
-          console.log(`Оновлення інформації про факультет ${faculty.title}`);
+        if (faculty.title_ua != info.title_ua || faculty.content_ua != info.content_ua) {
+          console.log(`Оновлення інформації про факультет ${faculty.title_ua}`);
+          
           const updatedFaculty = {
             ...faculty,
-            title: info.title,
-            content: info.content
+            title_ua: info.title_ua,
+            title_en: faculty.title_en || "", 
+            content_ua: info.content_ua,
+            content_en: faculty.content_en || "" 
           };
 
           return await infoCards.update(updatedFaculty);
         }
       } catch (error) {
-        console.warn(`Помилка при парсингу інформації про ${faculty.title}:`, error);
+        console.warn(`Помилка при парсингу інформації про ${faculty.title_ua}:`, error);
         return null;
       }
-    })
+    });
 
   await Promise.all(allLoaded);
 }

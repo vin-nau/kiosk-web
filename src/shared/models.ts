@@ -6,10 +6,13 @@ export type Faculty = {
 
 export type InfoCard = {
   id: string,
-  title: string,
-  subtitle?: string | null,
+  title_ua: string,
+  title_en?: string,
+  subtitle_ua?: string | null,
+  subtitle_en?: string | null,
   image?: string | null,
-  content?: string | null,
+  content_ua?: string | null,
+  content_en?: string | null,
   
   // Category of the info, e.g. "students", "abiturients", "faculties"
   category: string,  
@@ -58,8 +61,10 @@ export type VideoSubtitle = {
 
 export type Video = {
   id: string;
-  title: string;
-  description: string;
+  title_ua: string;
+  title_en?: string;
+  description_ua: string;
+  description_en?: string;
   src: string;
   image: string | null;
   category: string;

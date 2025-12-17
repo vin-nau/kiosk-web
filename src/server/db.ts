@@ -29,9 +29,12 @@ async function initDb() {
       await db.exec(`
         CREATE TABLE IF NOT EXISTS info_cards (
             id TEXT PRIMARY KEY,
-            title TEXT NOT NULL,
-            subtitle TEXT,
-            content TEXT,
+            title_ua TEXT NOT NULL,
+            title_en TEXT,
+            subtitle_ua TEXT,
+            subtitle_en TEXT,
+            content_ua TEXT,
+            content_en TEXT,
             image TEXT,
             category TEXT NOT NULL,
             subcategory TEXT,
@@ -44,11 +47,13 @@ async function initDb() {
       await db.exec(`
         CREATE TABLE IF NOT EXISTS videos (
           id TEXT PRIMARY KEY,
-          title TEXT NOT NULL,
+          title_ua TEXT NOT NULL,
+          title_en TEXT,
           src TEXT NOT NULL,
           image TEXT,
           category TEXT NOT NULL,
-          description TEXT,
+          description_ua TEXT,
+          description_en TEXT,
           published BOOLEAN DEFAULT TRUE,
           position INTEGER,
           date DATETIME DEFAULT CURRENT_TIMESTAMP
@@ -112,16 +117,16 @@ const infoCards = {
 
   async create(card: InfoCard): Promise<InfoCard> {
       const db = getDbInstance();
-      await db.run (`INSERT INTO info_cards (id, title, subtitle, content, image, category, subcategory, resource, position, published) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-          [card.id, card.title, card.subtitle, card.content, card.image, card.category, card.subcategory, card.resource, card.position, card.published]);
+      await db.run (`INSERT INTO info_cards (id, title_ua, title_en, subtitle_ua, subtitle_en, content_ua, content_en, image, category, subcategory, resource, position, published) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          [card.id, card.title_ua, card.title_en, card.subtitle_ua, card.subtitle_en, card.content_ua, card.content_en, card.image, card.category, card.subcategory, card.resource, card.position, card.published]);
       return card;
   },
 
   async update(card: InfoCard) {
       const db = getDbInstance();
       await db.run(
-          `UPDATE info_cards SET title = ?, subtitle = ?, content = ?, image = ?, category = ?, subcategory = ?, resource = ?, position = ?, published = ? WHERE id = ?`,
-          [ card.title, card.subtitle, card.content, card.image, card.category, card.subcategory, card.resource, card.position, card.published, card.id ]
+          `UPDATE info_cards SET title_ua = ?, title_en = ?, subtitle_ua = ?, subtitle_en = ?, content_ua = ?, content_en = ?, image = ?, category = ?, subcategory = ?, resource = ?, position = ?, published = ? WHERE id = ?`,
+          [ card.title_ua, card.title_en, card.subtitle_ua, card.subtitle_en, card.content_ua, card.content_en, card.image, card.category, card.subcategory, card.resource, card.position, card.published, card.id ]
       );
       return card;
   },
@@ -160,8 +165,8 @@ const videos = {
   async create(video: Video): Promise<Video> {
     const db = getDbInstance();
     await db.run(
-      `INSERT INTO videos (id, title, src, image, category, description, position, published) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-      [video.id, video.title, video.src, video.image, video.category, video.description, video.position, video.published]
+      `INSERT INTO videos (id, title_ua, title_en, src, image, category, description_ua, description_en, position, published) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [video.id, video.title_ua, video.title_en, video.src, video.image, video.category, video.description_ua, video.description_en, video.position, video.published]
     );
     return video;
   },
@@ -170,9 +175,9 @@ const videos = {
     const db = getDbInstance();
     await db.run(
       `UPDATE videos 
-      SET title = ?, src = ?, image = ?, category = ?, description = ?, published = ?, position = ?
+      SET title_ua = ?, title_en = ?, src = ?, image = ?, category = ?, description_ua = ?, description_en = ?, published = ?, position = ?
       WHERE id = ?`,
-      [video.title, video.src, video.image, video.category, video.description, video.published, video.position, video.id]
+      [video.title_ua, video.title_en, video.src, video.image, video.category, video.description_ua, video.description_en, video.published, video.position, video.id]
     );
     return video;
   },

@@ -84,7 +84,7 @@ export async function syncCentersData() {
         (!!existing.image && existing.image.startsWith('/uploads'))
       );
 
-      if (existing && existing.title === cleanTitle) continue;
+      if (existing && existing.title_ua === cleanTitle) continue;
 
       let imageValue: string | null;
       let resourceValue: string | undefined;
@@ -99,9 +99,12 @@ export async function syncCentersData() {
 
       const centerCard: InfoCard = {
         id: card.id,
-        title: cleanTitle,
-        subtitle: undefined,
-        content: finalContent,
+        title_ua: cleanTitle,
+        title_en: "",
+        subtitle_ua: "",
+        subtitle_en: "",
+        content_ua: finalContent,
+        content_en: "",
         image: imageValue,
         category: TARGET_CATEGORY,
         subcategory: null,
@@ -113,7 +116,13 @@ export async function syncCentersData() {
       updatedCount++;
 
       if (existing) {
-        await infoCards.update({...existing, ...centerCard, published: existing.published });
+        await infoCards.update({
+        ...existing, 
+        ...centerCard,
+        title_en: existing.title_en || "",
+        subtitle_en: existing.subtitle_en || "",
+        content_en: existing.content_en || "", 
+        published: existing.published });
       } else {
         await infoCards.create(centerCard);
       }

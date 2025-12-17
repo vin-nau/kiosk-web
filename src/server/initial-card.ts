@@ -1,14 +1,12 @@
 import type { InfoCard } from "../shared/models";
 
-
 export const initialCards: InfoCard[] = [
-    ///////////////////
-    // Student cards //
-    ///////////////////
     {
         id: "rectorate-info",
-        title: "Все про ректорат",
-        subtitle: "",
+        title_ua: "Все про ректорат",
+        title_en: "",
+        subtitle_ua: "",
+        subtitle_en: "",
         category: "students",
         subcategory: "rectorat_members",
         position: 0,
@@ -16,91 +14,99 @@ export const initialCards: InfoCard[] = [
     },
     {
         id: "functional-parts",
-        title: "Функціональні частини",
-        subtitle: "",
+        title_ua: "Функціональні частини",
+        title_en: "",
+        subtitle_ua: "",
+        subtitle_en: "",
         category: "students",
-        subcategory: "centers", 
+        subcategory: "centers",
         image: "/img/students/list.png",
         position: 1,
         published: true
     },
     {
         id: "vnau-buildings",
-        title: "Схема розташувань будівель ВНАУ",
-        subtitle: "",
-        content: "no info",
+        title_ua: "Схема розташувань будівель ВНАУ",
+        title_en: "",
+        subtitle_ua: "",
+        subtitle_en: "",
+        content_ua: "no info",
+        content_en: "",
         category: "students",
         position: 2,
         published: true
     },
     {
         id: "faculties",
-        title: "Факультети",
-        subtitle: "",
+        title_ua: "Факультети",
+        title_en: "",
+        subtitle_ua: "",
+        subtitle_en: "",
         category: "students",
-        subcategory: "faculties", // requires an API /api/faculties returning Info objects
+        subcategory: "faculties",
         position: 3,
         image: "/img/students/building.png",
         published: true
     },
     {
         id: "dean-offices",
-        title: "Деканати",
-        subtitle: "",
-        content: "no info",
+        title_ua: "Деканати",
+        title_en: "",
+        subtitle_ua: "",
+        subtitle_en: "",
+        content_ua: "no info",
+        content_en: "",
         category: "students",
         position: 4,
         image: "/img/students/journal.png",
         published: true
     },
-
-    ///////////////////////
-    // Abiturient cards  //
-    //////////////////////
     {
         id: "rules",
-        title: "Правила вступу",
-        subtitle: "",
+        title_ua: "Правила вступу",
+        title_en: "",
+        subtitle_ua: "",
+        subtitle_en: "",
         category: "abiturients",
         subcategory: null,
         position: 0,
-        content: `<h2>Загальні положення</h2>
+        content_ua: `<h2>Загальні положення</h2>
                   <div class="list-item">
                     <p>1. Правила прийому до Вінницького національного аграрного університету на навчання для здобуття
-                        вищої освіти в 2025 році (далі - Правила прийому) розроблені Приймальною комісією Вінницького
-                        національного аграрного університету (далі - Приймальна комісія) відповідно до Порядку прийому
-                        на навчання для здобуття вищої освіти в 2025 році затвердженого Наказом Міністерства освіти і
-                        науки України 10 лютого 2025 року за №168 зареєстрованого в Міністерстві юстиції України 26
-                        лютого 2025 року за № 15/41360. Зміни до правил прийому внесено відповідно до Наказу
-                        Міністерства освіти і науки України 18 червня 2025 року за №877 зареєстровано в Міністерстві
-                        юстиції України 25 червня 2025 року №987/44393 «Про затвердження змін до Порядку прийому на
-                        навчання для здобуття вищої освіти в 2025 році із змінами і доповненнями, внесеними Наказом
-                        Міністерства освіти і науки України від 27 червня 2025 року №936».</p>
+                       вищої освіти в 2025 році (далі - Правила прийому) розроблені Приймальною комісією Вінницького
+                       національного аграрного університету (далі - Приймальна комісія) відповідно до Порядку прийому
+                       на навчання для здобуття вищої освіти в 2025 році затвердженого Наказом Міністерства освіти і
+                       науки України 10 лютого 2025 року за №168 зареєстрованого в Міністерстві юстиції України 26
+                       лютого 2025 року за № 15/41360. Зміни до правил прийому внесено відповідно до Наказу
+                       Міністерства освіти і науки України 18 червня 2025 року за №877 зареєстровано в Міністерстві
+                       юстиції України 25 червня 2025 року №987/44393 «Про затвердження змін до Порядку прийому на
+                       навчання для здобуття вищої освіти в 2025 році із змінами і доповненнями, внесеними Наказом
+                       Міністерства освіти і науки України від 27 червня 2025 року №936».</p>
                 </div>
                 <div class="list-item">
                     <p>2. Підставою для оголошення прийому на навчання є ліцензії Міністерства освіти і науки України на
-                        провадження освітньої діяльності на рівні (рівнях) вищої освіти, за освітніми програмами, що
-                        передбачають присвоєння професійної кваліфікації з професій, для яких запроваджено додаткове
-                        регулювання на певному рівні вищої освіти, та правила прийому, які затверджено відповідно до
-                        закону, Порядку та цих Правил прийому.</p>
+                       провадження освітньої діяльності на рівні (рівнях) вищої освіти, за освітніми програмами, що
+                       передбачають присвоєння професійної кваліфікації з професій, для яких запроваджено додаткове
+                       регулювання на певному рівні вищої освіти, та правила прийому, які затверджено відповідно до
+                       закону, Порядку та цих Правил прийому.</p>
                 </div>
                 <div class="list-item">
                     <p>3. Прийом на навчання здійснюється університетом на конкурсній основі.</p>
                 </div>
                 <div class="list-item">
                     <p>4. Організацію прийому вступників здійснює приймальна комісія - робочий орган університету.
-                        Приймальна комісія діє згідно з положенням про приймальну комісію Вінницького національного
-                        аграрного університету, розробленим з урахуванням вимог законодавства, Положення про приймальну
-                        комісію вищого навчального закладу, затвердженого наказом Міністерства освіти і науки України
-                        від 15 жовтня 2015 року № 1085, зареєстрованого в Міністерстві юстиції України 04 листопада 2015
-                        року за № 1353/27798. Положення про приймальну комісію закладу Вінницького національного
-                        аграрного університету оприлюднюється на його офіційному вебсайті. Ректор університету
-                        забезпечує дотримання законодавства України, зокрема Правил прийому, та Порядку, а також
-                        відкритість та прозорість роботи приймальної комісії. Рішення приймальної комісії, прийняте в
-                        межах її компетенції, є підставою для видання відповідного наказу та/або виконання процедур
-                        вступної кампанії. Усі питання, пов’язані з прийомом на навчання, вирішуються приймальною
-                        комісією на її засіданнях. Рішення приймальної комісії оприлюднюється на офіційному вебсайті
-                        університету не пізніше наступного дня після їх прийняття.</p>
+                       Приймальна комісія діє згідно з положенням про приймальну комісію Вінницького національного
+                       аграрного університету, розробленим з урахуванням вимог законодавства, Положення про приймальну
+                       комісію вищого навчального закладу, затвердженого наказом Міністерства освіти і науки України
+                       від 15 жовтня 2015 року № 1085, зареєстрованого в Міністерстві юстиції України 04 листопада 2015
+                       року за № 1353/27798. Положення про приймальну комісію закладу Вінницького національного
+                       аграрного університету оприлюднюється на його офіційному вебсайті. Ректор університету
+                       забезпечує дотримання законодавства України, зокрема Правил прийому, та Порядку, а також
+                       відкритість та прозорість роботи приймальної комісії. Рішення приймальної комісії, прийняте в
+                       межах її компетенції, є підставою для видання відповідного наказу та/або виконання процедур
+                       вступної кампанії. Усі питання, пов’язані з прийомом на навчання, вирішуються приймальною
+                       комісією на її засіданнях. Рішення приймальної комісії оприлюднюється на офіційному вебсайті
+                       університету не пізніше наступного дня після їх прийняття.</p>
                 </div>
                 <div class="info-section">
                     <h2>Критерії оцінювання мотиваційного листа</h2>
@@ -121,19 +127,22 @@ export const initialCards: InfoCard[] = [
                     </div>
                     <div class="list-item">
                         <p>6. Рівень мотивації щодо вступу до Вінницького національного аграрного університету на відповідну
-                            спеціальність.</p>
+                           спеціальність.</p>
                     </div>
                 </div>`,
+        content_en: "",
         image: "/img/students/rules.png",
         published: true
     },
     {
         id: "specialities",
-        title: "Спеціальності та освітні програми",
-        subtitle: "",
+        title_ua: "Спеціальності та освітні програми",
+        title_en: "",
+        subtitle_ua: "",
+        subtitle_en: "",
         category: "abiturients",
         position: 1,
-        content: `<div class="program-list">
+        content_ua: `<div class="program-list">
                     <div class="accredited-section">АКРЕДИТОВАНІ:</div>
                         <ol class="accredited-list">
                             <li>Економіка</li>
@@ -212,16 +221,19 @@ export const initialCards: InfoCard[] = [
                         <li>Ветеринарна гігієна, санітарія і експертиза</li>
                     </ol>
             </div>`,
+        content_en: "",
         image: "/img/students/specialities.png",
         published: true
     },
     {
         id: "admission",
-        title: "Вступна кампанія",
-        subtitle: "",
+        title_ua: "Вступна кампанія",
+        title_en: "",
+        subtitle_ua: "",
+        subtitle_en: "",
         category: "abiturients",
         position: 2,
-        content: `<h2 class="section-title">Основні дати вступної кампанії 2025</h2>
+        content_ua: `<h2 class="section-title">Основні дати вступної кампанії 2025</h2>
 
             <div class="info-section">
                 <h3>Ступінь бакалавра</h3>
@@ -300,17 +312,19 @@ export const initialCards: InfoCard[] = [
                 </li>
             </ul>
         </div>`,
+        content_en: "",
         image: "/img/students/admission.png",
         published: true
     },
-
     {
         id: "documents",
-        title: "Необхідні документи",
-        subtitle: "",
+        title_ua: "Необхідні документи",
+        title_en: "",
+        subtitle_ua: "",
+        subtitle_en: "",
         category: "abiturients",
         position: 3,
-        content: `<div class="doc-section">
+        content_ua: `<div class="doc-section">
                 <h3>Основні документи:</h3>
                 <ul>
                     <li>Паспорт громадянина України або ID-картка.</li>
@@ -329,32 +343,36 @@ export const initialCards: InfoCard[] = [
                 </ul>
             </div>
         </div>`,
+        content_en: "",
         image: "/img/students/documents.png",
         published: true
     },
-
     {
         id: "contacts",
-        title: "Контакти приймальної комісії",
-        subtitle: "",
+        title_ua: "Контакти приймальної комісії",
+        title_en: "",
+        subtitle_ua: "",
+        subtitle_en: "",
         category: "abiturients",
         position: 4,
-        content: `<div class="contact-info">
+        content_ua: `<div class="contact-info">
                 <p><strong>Місцезнаходження:</strong> м. Вінниця, вул. Сонячна 3, корпус 1</p>
                 <p><strong>Телефон:</strong> (0432) 46-74-37, 57-44-42</p>
                 <p><strong>Email:</strong> pk_vnau@ukr.net</p>
             </div>`,
+        content_en: "",
         image: "/img/students/contacts.png",
         published: true
     },
-
     {
         id: "tution",
-        title: "Вартість навчання",
-        subtitle: "",
+        title_ua: "Вартість навчання",
+        title_en: "",
+        subtitle_ua: "",
+        subtitle_en: "",
         category: "abiturients",
         position: 5,
-        content: `<div class="table-caption">
+        content_ua: `<div class="table-caption">
                 Вартість надання освітніх послуг понад державне (регіональне) замовлення в межах ліцензійного обсягу
                 (розмір щомісячної плати протягом передбаченого терміну навчання)
             </div>
@@ -596,16 +614,19 @@ export const initialCards: InfoCard[] = [
                 *Вартість навчання сформовано відповідно до Постанови Кабінету Міністрів України від 26 березня 2020 р.
                 № 191 "Деякі питання підвищення кваліфікації".
             </div>`,
+        content_en: "",
         image: "/img/students/tution.png",
         published: true
     },
     {
         id: "student-life",
-        title: "Студентське життя",
-        subtitle: "",
+        title_ua: "Студентське життя",
+        title_en: "",
+        subtitle_ua: "",
+        subtitle_en: "",
         category: "abiturients",
         position: 6,
-        content: `<hr class="hr-separator">
+        content_ua: `<hr class="hr-separator">
             <h2>Студентське життя у ВНАУ — це більше, ніж навчання!</h2>
 
             <div class="info-section">
@@ -650,16 +671,19 @@ export const initialCards: InfoCard[] = [
                 <p>ВНАУ — це місце, де поєднуються комфорт, знання та розвиток. Тут студенти не лише отримують якісну
                     освіту, а й живуть щасливим та продуктивним життям!</p>
             </div>`,
+        content_en: "",
         image: "/img/students/student-life.png",
         published: true
     },
     {
         id: "about",
-        title: "Про університет ",
-        subtitle: "",
+        title_ua: "Про університет ",
+        title_en: "",
+        subtitle_ua: "",
+        subtitle_en: "",
         category: "abiturients",
         position: 7,
-        content: `<hr class="hr-separator">
+        content_ua: `<hr class="hr-separator">
             <div class="info-section">
                 <p>Нині українська земля потребує кваліфікованих аграріїв, людей, які розуміють і поважають її. Саме таких фахівців готує у своїх стінах Вінницький національний аграрний університет.</p>
                 <p><strong>ВНАУ</strong> — потужний осередок освіти і науки із сучасною матеріально-технічною базою, розлогою мережею філій та наукових центрів, широко відомий в Україні та за кордоном.</p>
@@ -680,15 +704,16 @@ export const initialCards: InfoCard[] = [
             <div class="info-section">
                 <p>ВНАУ є провідним навчальним закладом України з впровадження сучасних інноваційних методик організації навчального процесу, електронних засобів навчання, тестового контролю залишкових знань тощо. Електронна система управління якістю освітньої діяльності “Сократ” є власною розробкою університету та глобальним Інформаційним базсом для управління навчальним процесом; електронної підтримки бібліотеки; репозиторію університету; науково-консультативного освітнього середовища університету.</p>
             </div>`,
+        content_en: "",
         image: "/img/students/about.png",
         published: true
     },
-  /////////////////
-  // Faculties.  //
-  /////////////////
     {
         id: "agronomichnij-fakultet",
-        title: "Факультет агрономії, садівництва та захисту рослин",
+        title_ua: "Факультет агрономії, садівництва та захисту рослин",
+        title_en: "",
+        subtitle_ua: "",
+        subtitle_en: "",
         category: "faculties",
         resource: "https://vsau.org/fakulteti/agronomichnij-fakultet",
         image: "/img/faculties/agro.png",
@@ -697,7 +722,10 @@ export const initialCards: InfoCard[] = [
     },
     {
         id: "2",
-        title: "Факультет екології, лісівництва та садово-паркового господарства",
+        title_ua: "Факультет екології, лісівництва та садово-паркового господарства",
+        title_en: "",
+        subtitle_ua: "",
+        subtitle_en: "",
         category: "faculties",
         resource: "https://vsau.org/fakulteti/fakultet-ekologiii-lisnicztva-ta-sadovo-parkovogo-gospodarstva",
         image: "/img/faculties/ecology.png",
@@ -706,63 +734,86 @@ export const initialCards: InfoCard[] = [
     },
     {
         id: "3",
-        title: "Інженерно-технологічний факультет",
+        title_ua: "Інженерно-технологічний факультет",
+        title_en: "",
+        subtitle_ua: "",
+        subtitle_en: "",
         category: "faculties",
         resource: "https://vsau.org/fakulteti/inzhenerno-tekhnolohichnyi-fakultet",
         image: "/img/faculties/itf.png",
-        content: "no info",
+        content_ua: "no info",
+        content_en: "",
         position: 2,
         published: true
     },
     {
         id: "4",
-        title: "Факультет економіки, інформаційних технологій та сфери обслуговування",
+        title_ua: "Факультет економіки, інформаційних технологій та сфери обслуговування",
+        title_en: "",
+        subtitle_ua: "",
+        subtitle_en: "",
         category: "faculties",
         resource: "https://vsau.org/fakulteti/fakultet-ekonomiky-informatsiinykh-tekhnolohii-ta-sfery-obsluhovuvannia",
         image: "/img/faculties/economics.png",
-        content: "no info",
+        content_ua: "no info",
+        content_en: "",
         position: 3,
         published: true
     },
     {
         id: "5",
-        title: "Факультет обліку, фінансів та аудиту",
+        title_ua: "Факультет обліку, фінансів та аудиту",
+        title_en: "",
+        subtitle_ua: "",
+        subtitle_en: "",
         category: "faculties",
         resource: "https://vsau.org/fakulteti/fakultet-obliku-finansiv-ta-audytu",
         image: "/img/faculties/finances.png",
-        content: "no info",
+        content_ua: "no info",
+        content_en: "",
         position: 4,
         published: true
     },
     {
         id: "6",
-        title: "Факультет менеджменту та права",
+        title_ua: "Факультет менеджменту та права",
+        title_en: "",
+        subtitle_ua: "",
+        subtitle_en: "",
         category: "faculties",
         resource: "https://vsau.org/fakulteti/fakultet-menedzhmentu-ta-prava",
         image: "/img/faculties/management.png",
-        content: "no info",
+        content_ua: "no info",
+        content_en: "",
         position: 5,
         published: true
     },
     {
         id: "7",
-        title: "Факультет технології виробництва, переробки та робототехніки у тваринництві",
+        title_ua: "Факультет технології виробництва, переробки та робототехніки у тваринництві",
+        title_en: "",
+        subtitle_ua: "",
+        subtitle_en: "",
         category: "faculties",
         resource: "https://vsau.org/fakulteti/fakultet-texnologiii-virobnicztva",
         image: "/img/faculties/plants.png",
-        content: "no info",
+        content_ua: "no info",
+        content_en: "",
         position: 6,
         published: true
     },
     {
         id: "8",
-        title: "Факультет ветеринарної медицини",
+        title_ua: "Факультет ветеринарної медицини",
+        title_en: "",
+        subtitle_ua: "",
+        subtitle_en: "",
         category: "faculties",
         resource: "https://vsau.org/fakulteti/fakultet-veterinarnoii-mediczini",
         image: "/img/faculties/veterinarian.png",
-        content: "no info",
+        content_ua: "no info",
+        content_en: "",
         position: 7,
         published: true
     },
- 
 ];

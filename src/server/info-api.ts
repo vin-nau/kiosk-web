@@ -37,6 +37,9 @@ cards.post("/:category", validateCategory, rejectInvalid, authorized, singleImag
   const category = req.params.category;
   card.id = crypto.randomUUID();
   card.category = category;
+  card.title_ua = card.title_ua || card.title;
+  card.subtitle_ua = card.subtitle_ua || card.subtitle;
+  card.content_ua = card.content_ua || card.content;
   
   console.log(`Creating new ${category} card:`, card);
 
@@ -85,6 +88,13 @@ cards.put("/:category/:id", validateCategory, rejectInvalid, authorized, singleI
   if (!oldCard) {
       return res.status(404).json({ error: "Картку не знайдено" });
   }
+
+  card.title_ua = card.title_ua || card.title || oldCard.title_ua;
+  card.subtitle_ua = card.subtitle_ua || card.subtitle || oldCard.subtitle_ua;
+  card.content_ua = card.content_ua || card.content || oldCard.content_ua;
+  card.title_en = card.title_en || oldCard.title_en; 
+  card.subtitle_en = card.subtitle_en || oldCard.subtitle_en; 
+  card.content_en = card.content_en || oldCard.content_en;
   
   const ALLOWED_FOLDERS = new Set(['centers', 'rectorat', 'subtitles']);
   const subfolder = ALLOWED_FOLDERS.has(req.params.category) ? req.params.category : null;
