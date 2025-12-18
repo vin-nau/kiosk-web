@@ -37,6 +37,17 @@ export type MkrGroup = {
   course: number;
 }
 
+export type Chairs = {
+  id: string;
+  name: string;
+  image: string;
+}
+
+export type Teachers = {
+  id: number;
+  name: string
+}
+
 export type LessonTime = {
   time: string;
   end: string;
