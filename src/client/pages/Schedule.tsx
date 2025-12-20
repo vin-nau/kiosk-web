@@ -1,168 +1,330 @@
 import { useEffect, useState } from "react";
-import type { Faculty, MkrEvent, MkrGroup } from "../../shared/models";
+import { motion } from "motion/react";
+import type { MkrEvent, MkrGroup, Teachers } from "../../shared/models";
 import './Schedule.css';
-import { getFacutlyGroups, getFaculties, getGroupSchedule, getCourseName, getLessonHours } from "../lib/schedule";
+import { 
+  getFacultyGroups, getFaculties, getGroupSchedule, getCourseName, getLessonHours,
+  getChairs, getChairTeachers, getTeacherSchedule 
+} from "../lib/schedule";
 import CardButton, { CardSize } from "../components/cards/CardButton";
 import GroupSchedule from "../components/GroupSchedule";
 import { Loader } from "../components/Loader";
 import { ErrorOverlay } from "../components/ErrorOverlay";
 import { useTranslation } from "react-i18next";
+import CloseButton from "../components/cards/CloseButton";
 
-type FacultiesListProps = {
-  faculties: Faculty[],
-  active?: Faculty | null,
-  onSelect: (faculty: Faculty) => void
-};
+
+type ScheduleMode = 'students' | 'teachers';
+
+type GenericItem = {
+  id: string | number;
+  name: string;
+  image?: string;
+}
 
 const lessonHours = getLessonHours();
 
-function FacultiesList({ faculties, active, onSelect }: FacultiesListProps) {
-  const size = active == null ? CardSize.Full : CardSize.Minimized;
-  return <>
-    <div className={"faculties" + (size === CardSize.Minimized ? " minimized" : "")}>
-      {
-        faculties.map((faculty) => (
-          <CardButton 
-            key={faculty.id} 
-            title={faculty.name}
-            active={faculty.id === active?.id}
-            size={size}
-            image={faculty.image} 
-            onClick={() => onSelect(faculty)} 
-          />
-        ))
-      }
-    </div>
-  </>
-}
+function DetailsContent({ parentId, mode, onClose }: { parentId: string | number, mode: ScheduleMode, onClose: () => void }) {
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
 
-function FacultyGroups({ faculty }: { faculty: Faculty}) {
-  const [loading, setLoading] = useState<boolean>(true);
   const [groups, setGroups] = useState<Map<number, MkrGroup[]> | null>(null);
   const [activeCourse, setActiveCourse] = useState<number | null>(null);
   const [courseGroups, setCourseGroups] = useState<MkrGroup[] | null>(null);
   const [currentGroup, setCurrentGroup] = useState<MkrGroup | null>(null);
+
+  const [teachers, setTeachers] = useState<Teachers[] | null>(null);
+  const [currentTeacher, setCurrentTeacher] = useState<Teachers | null>(null);
+
   const [currentSchedule, setCurrentSchedule] = useState<MkrEvent[] | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  
+
   useEffect(() => {
-    setError(null);
     setLoading(true);
-    
-    getFacutlyGroups(faculty.id).then(t => {
-      setGroups(t);
-      setLoading(false);
-    }).catch(e => {
-      setLoading(false);
-      console.error(e);
-      setCurrentSchedule(null);
-      setError(`Не вдалося завантажити розклад`);
-    });
-
-  }, [faculty]);
-
-  useEffect(() => {
-    setCurrentSchedule(null);    
     setError(null);
+    setGroups(null);
+    setTeachers(null);
+    setCourseGroups(null);
+    setActiveCourse(null);
+    setCurrentGroup(null);
+    setCurrentTeacher(null);
+    setCurrentSchedule(null);
 
-    if (currentGroup) {
-      setLoading(true);
-      getGroupSchedule(faculty.id, currentGroup.course, currentGroup.id).then(schedule => {
+    if (mode === 'students') {
+      getFacultyGroups(String(parentId)).then(s => {
+        setGroups(s);
         setLoading(false);
-        setCurrentSchedule(schedule);
-      }).catch(e => {
+      }).catch(err => {
+        console.error(err);
+        setError("Не вдалося завантажити групи");
         setLoading(false);
-        console.error(e);
-        setCurrentSchedule(null);
-        setError(`Не вдалося завантажити розклад`);
       });
     } else {
-      setLoading(false);
+      getChairTeachers(Number(parentId)).then(s => {
+        setTeachers(s);
+        setLoading(false);
+      }).catch(err => {
+        console.error(err);
+        setError("Не вдалося завантажити викладачів");
+        setLoading(false);
+      });
     }
-  }, [currentGroup]);
+  }, [parentId, mode]);
 
   useEffect(() => {
-    setError(null);
-    if (activeCourse !== null && groups) {
+    if (mode === 'students' && activeCourse !== null && groups) {
       setCourseGroups(groups.get(activeCourse) || null);
       setCurrentGroup(null);
+      setCurrentSchedule(null);
     }
-  }, [activeCourse, groups]);
+  }, [activeCourse, groups, mode]);
+
+  useEffect(() => {
+    if (!currentGroup && !currentTeacher) {
+      setCurrentSchedule(null);
+      return;
+    }
+
+    setLoading(true);
+    setCurrentSchedule(null);
+
+    const fetchSchedule = async () => {
+      try {
+        let s: MkrEvent[] = [];
+        if (mode === 'students' && currentGroup) {
+          s = await getGroupSchedule(String(parentId), currentGroup.course, currentGroup.id);
+        } else if (mode === 'teachers' && currentTeacher) {
+          s = await getTeacherSchedule(Number(parentId), currentTeacher.id);
+        }
+        setCurrentSchedule(s);
+      } catch (err) {
+        console.error(err);
+        setError("Не вдалося завантажити розклад");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSchedule();
+  }, [currentGroup, currentTeacher, parentId, mode]);
 
   return (
-    <div>
-      {
-        groups ? (
-          <div className="courses">
-            { 
-              Array.from(groups.keys()).sort().map((course) => {
-                return <CardButton 
-                  title={getCourseName(course)} 
-                  size={CardSize.Micro} 
+    <div className="active-info">
+      <div style={{ position: 'absolute', right: mode === 'teachers' ? '-10px' : '20px', top: '20px', zIndex: 100 }}>
+        <CloseButton onClick={onClose} />
+      </div>
+      <section>
+        <div className="content">
+          
+          {mode === 'students' && groups && (
+            <div className="courses">
+              {Array.from(groups.keys()).sort().map((course) => (
+                <CardButton
                   key={course}
+                  title={getCourseName(course)}
+                  size={CardSize.Micro}
                   active={activeCourse === course}
                   onClick={() => setActiveCourse(course)}
                 />
-              })
-            }
-          </div>
-        ) : <></>
-      }
-      <div className="groups-schedule">
-  {
-          courseGroups ? (
-            <div className="groups">
-                {
-                  courseGroups.map((group) => 
-                    <CardButton 
-                        title={group.name} 
-                        size={CardSize.Micro} 
-                        key={group.id}
-                        active={currentGroup?.id === group.id}
-                        onClick={() => setCurrentGroup(group)} 
-                      />
-                  )
-                }
+              ))}
             </div>
-          ) : <></>
-        }
+          )}
 
-        <ErrorOverlay error={error} />        
+          {mode === 'teachers' && teachers && (
+             <div className="courses">
+                 {teachers.map((teacher) => (
+                    <CardButton
+                      key={teacher.id}
+                      title={teacher.name}
+                      size={CardSize.Minimized}
+                      active={currentTeacher?.id === teacher.id}
+                      onClick={() => setCurrentTeacher(teacher)}
+                    />
+                 ))}
+             </div>
+          )}
 
-        { loading ? <Loader /> : <></>}
 
-        {
-          currentSchedule != null ? <GroupSchedule schedule={currentSchedule} lessonHours={lessonHours} /> : <></>
-        }
-      </div>
+          <div 
+             className="groups-schedule"
+             style={mode === 'teachers' ? { justifyContent: 'center' } : {}}
+          >
+              
+             {mode === 'students' && courseGroups && (
+                <div className="groups">
+                  {courseGroups.map((group) => (
+                    <CardButton
+                      key={group.id}
+                      title={group.name}
+                      size={CardSize.Micro}
+                      active={currentGroup?.id === group.id}
+                      onClick={() => setCurrentGroup(group)}
+                    />
+                  ))}
+                </div>
+             )}
+
+             {currentSchedule != null && (
+                 <div className="schedule-container">
+                    <GroupSchedule schedule={currentSchedule} lessonHours={lessonHours} />
+                 </div>
+             )}
+             
+             <ErrorOverlay error={error} />
+             {loading && <Loader />}
+             
+          </div>
+
+        </div>
+      </section>
     </div>
   );
 }
 
-function Schedule() {
-  const [faculties, setFaculties] = useState<Faculty[]>([]);
+function GenericList({ items, activeId, onSelect, mode, onCloseParent }: { items: GenericItem[], activeId: string | number | null, onSelect: (item: GenericItem) => void, mode: ScheduleMode, onCloseParent: () => void }) {
+  const size = activeId == null ? CardSize.Full : CardSize.Minimized;
+  const partiallyFilled = items.length < 3; 
+
+  const shouldShift = mode === 'teachers';
+
+  return (
+    <>
+      {!activeId && (
+        <div className="active-info">
+             <div >
+                <CloseButton onClick={onCloseParent} />
+             </div>
+             
+             <div className="content" style={{ textAlign: 'center', opacity: 0.8 }}>
+                <p>Оберіть {mode === 'students' ? 'факультет' : 'кафедру'} зі списку нижче:</p>
+             </div>
+        </div>
+      )}
+
+      <motion.div 
+        className={"info-cards" + (size === CardSize.Minimized ? " minimized" : "") + (partiallyFilled ? " partially-filled" : "")}
+        transition={{ duration: 0.6, ease: "easeInOut" }}
+      >
+        {items.map((item) => (
+          <CardButton
+            key={item.id}
+            title={item.name}
+            active={item.id === activeId}
+            size={size}
+            image={item.image}
+            onClick={() => onSelect(item)}
+          />
+        ))}
+      </motion.div>
+
+      {activeId && (
+          <DetailsContent 
+            key={activeId}
+            parentId={activeId} 
+            mode={mode} 
+            onClose={() => onSelect({id: activeId, name: ''})} 
+          />
+      )}
+    </>
+  );
+}
+
+function ActiveScheduleMode({ mode, onClose }: { mode: ScheduleMode, onClose: () => void }) {
+  const [items, setItems] = useState<GenericItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [selectedFaculty, setSelectedFaculty] = useState<Faculty | null>(null);
-  const {t} = useTranslation();
+  const [activeItem, setActiveItem] = useState<GenericItem | null>(null);
 
   useEffect(() => {
     setLoading(true);
-    getFaculties().then((f) => {
-      setFaculties(f);
-      setLoading(false);
-    }).catch(console.error);
-  }, []);
+    setItems([]);
+    setActiveItem(null);
+
+    const fetchData = async () => {
+      try {
+        if (mode === 'students') {
+          const data = await getFaculties();
+          setItems(data);
+        } else {
+          const data = await getChairs();
+          setItems(data);
+        }
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, [mode]);
+
+  const handleSelect = (item: GenericItem) => {
+    if (activeItem?.id === item.id) {
+      setActiveItem(null);
+    } else {
+      setActiveItem(item);
+    }
+  };
 
   return (
-    <div className="schedule-page">
-      {selectedFaculty == null ? <h1>{t('title.schedule')}</h1> : <></> }
-      
-      {loading ? <Loader /> : <></>}
-      <FacultiesList faculties={faculties} active={selectedFaculty} onSelect={setSelectedFaculty} />      
-      {
-        selectedFaculty != null ? <FacultyGroups faculty={selectedFaculty} /> : <></>
-      }
+    <>
+      {loading ? <Loader /> : (
+        <GenericList
+          items={items}
+          activeId={activeItem?.id || null}
+          onSelect={handleSelect}
+          mode={mode}
+          onCloseParent={onClose}
+        />
+      )}
+    </>
+  );
+}
 
+function ScheduleModesList({ active, onSelect }: { active: ScheduleMode | null, onSelect: (m: ScheduleMode) => void }) {
+  const size = active == null ? CardSize.Full : CardSize.Minimized;
+  //will be changed in the next fix
+  const modes = [
+    { 
+        id: 'students', 
+        title: 'Розклад для студентів',
+        image: '/img/faculties/agro.png' 
+    },
+    { 
+        id: 'teachers', 
+        title: 'Розклад для викладачів',
+        image: '/img/faculties/agro.png' 
+    }
+  ];
+
+  return (
+    <motion.div 
+      className={"info-cards" + (size === CardSize.Minimized ? " minimized" : "")}
+      transition={{ duration: 0.6, ease: "easeInOut" }}
+    >
+      {modes.map((m) => (
+        <CardButton
+          key={m.id}
+          title={m.title}
+          size={size}
+          active={m.id === active}
+          image={m.image} 
+          onClick={() => onSelect(m.id as ScheduleMode)}
+        />
+      ))}
+    </motion.div>
+  );
+}
+
+function Schedule() {
+  const [activeMode, setActiveMode] = useState<ScheduleMode | null>(null);
+  const { t } = useTranslation();
+
+  return (
+    <div className="schedule-page"> 
+      {activeMode == null ? <h1>{t('title.schedule')}</h1> : null}
+      <ScheduleModesList active={activeMode} onSelect={setActiveMode} />
+      {activeMode && (
+        <ActiveScheduleMode mode={activeMode} onClose={() => setActiveMode(null)} />
+      )}
     </div>
   );
 }

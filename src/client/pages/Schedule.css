@@ -2,7 +2,7 @@
   height: 100%;
 }
 
-.faculties {
+.info-cards {
   display: grid;
   justify-content: center;
   grid-template-columns: repeat(auto-fit, minmax(18em, auto));
@@ -10,7 +10,7 @@
   padding: 1em;
 }
 
-.faculties.minimized {
+.info-cards.minimized {
   display: flex;
   gap: 1em;
   flex-direction: row;
@@ -23,6 +23,22 @@
   background-color: var(--sub-menu-background);  
 }
 
+.info-cards.partially-filled {
+  justify-content: center;
+}
+
+.active-info {
+  width: 100%;
+}
+
+.active-info .content {
+  width: 100%;
+  padding: 0;
+}
+
+.active-info section {
+  width: 100%;
+}
 
 .courses {
   display: flex;
@@ -31,20 +47,39 @@
   overflow-x: auto;
   scroll-behavior: smooth;
   scrollbar-width: none; 
-  padding-left: 12px; /** To avoid cutting a shadow */
+  padding: 12px 12px 12px 0;
   scroll-snap-type: x mandatory;
-  justify-content: center;
+  justify-content: flex-start;
+  margin-bottom: 16px;
 }
 
 .groups-schedule {
   display: flex;
   flex-direction: row;
   gap: 16px;
+  padding: 0;
+  align-items: flex-start;
+  width: 100%;
 }
 
 .groups {
   display: flex;
   flex-direction: column;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  padding: 1em;
+  gap: 8px;
+  padding: 0;
+  flex-shrink: 0;
+  min-width: 120px;
+  max-width: 180px;
+}
+
+.schedule-container {
+  flex: 1 1 auto;
+  min-width: 0; 
+  overflow-x: auto; 
+  overflow-y: visible;
+  width: 100%;
+}
+
+.content {
+  margin-top: 1em;
 }
