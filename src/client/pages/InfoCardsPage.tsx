@@ -30,6 +30,43 @@ function decodeHtml(html: string): string {
   return txt.value;
 }
 
+const getLocalizedText = (
+  input: string | { ua: string; en?: string } | null | undefined | any, 
+  isEnglish: boolean
+): string => {
+  if (!input) return "";
+
+  if (typeof input === 'object') {
+    if (isEnglish && input.en) {
+      return input.en;
+    }
+    return input.ua || "";
+  }
+
+  if (typeof input === 'string') {
+    try {
+      const trimmed = input.trim();
+      if (trimmed.startsWith('[') || trimmed.startsWith('{')) {
+        const parsed = JSON.parse(input);
+        
+        if (Array.isArray(parsed)) {
+          if (isEnglish && parsed[1]) return parsed[1];
+          return parsed[0] || "";
+        }
+        
+        if (typeof parsed === 'object' && parsed !== null) {
+           if (isEnglish && parsed.en) return parsed.en;
+           return parsed.ua || "";
+        }
+      }
+    } catch (err) {
+    }
+    return input;
+  }
+
+  return "";
+};
+
 function loadSubItems(card: CardWithSubItems | null, update: (i: CardWithSubItems) => void): void {
   if (card && card.subcategory && !card.subItems) {
     loadCategory(card.subcategory).then((data) => {
@@ -43,6 +80,7 @@ function InfosList({ cards, active, onSelect }: CardsListProps) {
   const size = active == null ? CardSize.Full : CardSize.Minimized;
   const partiallyFilled = cards.length < 3;
   const { i18n } = useTranslation(); 
+  const isEnglish = i18n.language === 'en';
 
   return (
     <motion.div
@@ -50,11 +88,11 @@ function InfosList({ cards, active, onSelect }: CardsListProps) {
       transition={{ duration: 0.6, ease: "easeInOut" }}
     >
       {cards.map((info) => {
-        const isEn = i18n.language === 'en';
-        const title = (isEn && info.title_en) ? info.title_en : info.title_ua;
-        const subtitle = (isEn && info.subtitle_en) ? info.subtitle_en : info.subtitle_ua;
+        const title = getLocalizedText(info.title, isEnglish);
+        const subtitle = getLocalizedText(info.subtitle, isEnglish);
+        const contentVal = getLocalizedText(info.content, isEnglish);
         
-        const hasContent = !!info.content_ua || !!info.content_en;
+        const hasContent = !!contentVal;
 
         return (
           <CardButton
@@ -81,22 +119,21 @@ function InfosList({ cards, active, onSelect }: CardsListProps) {
 function ActiveInfo({ info, onClose }: { info: CardWithSubItems; onClose: () => void }) {
   const [activeInfo, setActiveInfo] = useState<CardWithSubItems | null>(info);
   const { i18n } = useTranslation();
+  const isEnglish = i18n.language === 'en';
 
   useEffect(() => setActiveInfo(info), [info]);
 
   const renderContent = () => {
-    const isEn = i18n.language === 'en';
-    const contentText = (isEn && activeInfo?.content_en) ? activeInfo.content_en : activeInfo?.content_ua;
+    if (!activeInfo?.content) return null;
 
-    if (!contentText) return null;
+    const localizedContent = getLocalizedText(activeInfo.content, isEnglish);
+    if (!localizedContent) return null;
 
-    const decoded = decodeHtml(contentText);
+    const decoded = decodeHtml(localizedContent);
     const safeHtml = DOMPurify.sanitize(decoded);
 
     return <div dangerouslySetInnerHTML={{ __html: safeHtml }} />;
   };
-
-  const hasContent = !!activeInfo?.content_ua || !!activeInfo?.content_en;
 
   return (
     <>
@@ -104,7 +141,7 @@ function ActiveInfo({ info, onClose }: { info: CardWithSubItems; onClose: () => 
         <InfosList cards={info.subItems ?? []} onSelect={setActiveInfo} active={activeInfo === info ? null : activeInfo} />
       ) : null}
 
-      {activeInfo && hasContent && (
+      {activeInfo && getLocalizedText(activeInfo.content, isEnglish) && (
         <div className="active-info">
           <CloseButton onClick={onClose} />
           <section>

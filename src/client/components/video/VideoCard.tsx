@@ -1,4 +1,4 @@
-import type { Video } from '../../../shared/models';
+import type { Video, LocalizedString } from '../../../shared/models';
 import CardButton, { CardSize } from '../cards/CardButton';
 import { useTranslation } from "react-i18next";
 
@@ -7,12 +7,25 @@ interface VideoCardProps {
   onClick: (video: Video) => void;
 }
 
+function getLocalized(value: LocalizedString | undefined, lang: string): string {
+  if (!value) return "";
+  
+  if (typeof value === 'string') {
+    return value;
+  }
+
+  if (lang === 'en' && value.en) {
+    return value.en;
+  }
+  
+  return value.ua || "";
+}
+
 export default function VideoCard({ video, onClick }: VideoCardProps) {
   const { i18n } = useTranslation();
-  const isEn = i18n.language === 'en';
 
-  const title = (isEn && video.title_en) ? video.title_en : video.title_ua;
-  const description = (isEn && video.description_en) ? video.description_en : video.description_ua;
+  const title = getLocalized(video.title, i18n.language);
+  const description = getLocalized(video.description, i18n.language);
 
   return <CardButton 
     title={title} 

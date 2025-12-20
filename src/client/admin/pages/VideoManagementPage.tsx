@@ -1,12 +1,18 @@
 import './VideoManagementPage.css'
 import { NavLink, useLoaderData } from 'react-router-dom';
 import { useState} from 'react';
-import type { Video } from '../../../shared/models';
+import type { Video, LocalizedString } from '../../../shared/models';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash, faFilePen, faIcons, faSquarePlus, faTrash } from '@fortawesome/free-solid-svg-icons';
 import config from '../../lib/config';
 import toast, { Toaster } from 'react-hot-toast';
 import performWithUndo from '../lib/undo';
+
+function getLocalizedText(value: LocalizedString | undefined): string {
+  if (!value) return "";
+  if (typeof value === 'string') return value;
+  return value.ua || value.en || "";
+}
 
 export function VideoManagementPage() {
   const loadedVideos = useLoaderData<Video[]>();
@@ -80,13 +86,13 @@ export function VideoManagementPage() {
           videos.map(video => (
             <li key={video.id} className="card video">            
               <div className="card-content">
-                { video.image ? <img src={video.image} alt={video.title} className="preview" /> : (
+                {video.image ? <img src={video.image} alt={getLocalizedText(video.title)} className="preview" /> : (
                   <div className="preview">📹</div>
                 )}
 
                 <div className="video-content">
                   <NavLink to={`/admin/categories/videos/${video.id}/edit`}>
-                    <h3>{video.title}</h3>
+                    <h3>{getLocalizedText(video.title)}</h3>
                   </NavLink>                
                   <div><FontAwesomeIcon icon={faIcons} /> {video.category}</div>
                 </div>

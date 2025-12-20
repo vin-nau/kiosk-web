@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import type { InfoCard } from "../../../shared/models";
+import type { InfoCard, LocalizedString } from "../../../shared/models";
 import { useLoaderData, useNavigate, useParams } from 'react-router';
 import { useDropzone } from 'react-dropzone';
 import toast, { Toaster } from 'react-hot-toast';
@@ -11,6 +11,14 @@ import { categoriesLoader } from '../lib/loaders';
 
 type PreviewFile = {
   preview: string;
+}
+
+const initValue = (val: LocalizedString | undefined, lang: 'ua' | 'en'): string => {
+  if (!val) return "";
+  if (typeof val === 'string') {
+    return lang === 'ua' ? val : "";
+  }
+  return (lang === 'en' ? val.en : val.ua) || "";
 }
 
 function SubcategoryEdit({ subcategory, onChange, suggestions }: { subcategory: string, onChange: (subcategory: string) => void, suggestions: string[] }) {
@@ -41,16 +49,11 @@ function SubcategoryEdit({ subcategory, onChange, suggestions }: { subcategory: 
 
 async function updateInfo(card: InfoCard, imageFile: File | null, create: boolean, url: string): Promise<boolean> {
   const formData = new FormData();
-  formData.append('title_ua', card.title_ua);
-  formData.append('title_en', card.title_en || "");
+  formData.append('title', JSON.stringify(card.title));
+  formData.append('subtitle', JSON.stringify(card.subtitle));
+  formData.append('content', JSON.stringify(card.content));
 
   if (card.category) formData.append('category', card.category);
-
-  if (card.subtitle_ua) formData.append('subtitle', card.subtitle_ua);
-  formData.append('subtitle_en', card.subtitle_en || "");
-
-  if (card.content_ua) formData.append('content', card.content_ua);
-  formData.append('content_en', card.content_en || "");
 
   if (card.subcategory) formData.append('subcategory', card.subcategory);
 
@@ -86,13 +89,14 @@ function CardEditorPage({ create }: { create?: boolean }) {
 
   const url = `/api/info/${card.category}`;
 
-  const [title, setTitle] = useState(card.title_ua);
-  const [subtitle, setSubtitle] = useState(card.subtitle_ua);
-  const [content, setContent] = useState<string | null>(card.content_ua ?? null);
+  const [title, setTitle] = useState(initValue(card.title, 'ua'));
+  const [titleEn, setTitleEn] = useState(initValue(card.title, 'en'));
 
-  const [titleEn, setTitleEn] = useState(card.title_en || "");
-  const [subtitleEn, setSubtitleEn] = useState(card.subtitle_en || "");
-  const [contentEn, setContentEn] = useState<string | null>(card.content_en ?? null);
+  const [subtitle, setSubtitle] = useState(initValue(card.subtitle, 'ua'));
+  const [subtitleEn, setSubtitleEn] = useState(initValue(card.subtitle, 'en'));
+
+  const [content, setContent] = useState<string | null>(initValue(card.content, 'ua'));
+  const [contentEn, setContentEn] = useState<string | null>(initValue(card.content, 'en'));
 
   const [image, setImage] = useState(card.image);
   const [category, setCategory] = useState(card.category ?? '');
@@ -128,12 +132,9 @@ function CardEditorPage({ create }: { create?: boolean }) {
     updateInfo(
       {
         ...card, 
-        title_ua: title,
-        subtitle_ua: subtitle,
-        content_ua: content,
-        title_en: titleEn, 
-        subtitle_en: subtitleEn, 
-        content_en: contentEn, 
+        title: { ua: title, en: titleEn },
+        subtitle: { ua: subtitle, en: subtitleEn },
+        content: { ua: content || "", en: contentEn || "" }, 
         subcategory, 
         category
       },

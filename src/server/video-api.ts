@@ -69,12 +69,24 @@ router.post('/videos', videoUpload.fields([
   { name: 'subtitle_uk', maxCount: 1 },
   { name: 'subtitle_en', maxCount: 1 }
 ]), async (req: Request, res: Response) => {
+  
   const files = req.files as { [fieldname: string]: Express.Multer.File[] } | undefined;
 
-  const titleUA = req.body.title_ua || req.body.title;
+  if (!req.body.title || !req.body.category || !files?.video) {
+    return res.status(400).json({ error: 'Обов\'язкові поля: title, category, video' });
+  }
 
-  if (!titleUA || !req.body.category || !files?.video) {
-    return res.status(400).json({ error: 'Обов\'язкові поля: title_ua, category, video' });
+  let title = req.body.title;
+  let description = req.body.description || '';
+
+  try {
+    if (typeof title === 'string' && (title.startsWith('[') || title.startsWith('{'))) {
+        title = JSON.parse(title); 
+    }
+    if (typeof description === 'string' && (description.startsWith('[') || description.startsWith('{'))) {
+        description = JSON.parse(description);
+    }
+  } catch (err) {
   }
 
   const category = req.body.category as string;
@@ -101,13 +113,11 @@ router.post('/videos', videoUpload.fields([
 
   const video: Video = {
     id: crypto.randomUUID(),
-    title_ua: titleUA,
-    title_en: req.body.title_en || "",
+    title: title,
     src: videoUrl(files.video[0].filename) ?? '',
     image: files?.image ? videoPreviewUrl(files.image[0].filename) : null,
     category,
-    description_ua: req.body.description_ua || req.body.description || "",
-    description_en: req.body.description_en || "",
+    description: description,
     published: req.body.published === 'true' || req.body.published === true,
     position: 0
   };
@@ -153,6 +163,19 @@ router.put('/videos/:id', videoUpload.fields([
   }
 
   const category = req.body.category as string;
+
+  let title = req.body.title || existingVideo.title;
+  let description = req.body.description || existingVideo.description;
+
+  try {
+    if (typeof req.body.title === 'string' && (req.body.title.startsWith('[') || req.body.title.startsWith('{'))) {
+        title = JSON.parse(req.body.title);
+    }
+    if (typeof req.body.description === 'string' && (req.body.description.startsWith('[') || req.body.description.startsWith('{'))) {
+        description = JSON.parse(req.body.description);
+    }
+  } catch (err) {
+  }
 
   // Determine video filename (use existing or new)
   let videoFilename: string;
@@ -215,11 +238,9 @@ router.put('/videos/:id', videoUpload.fields([
   const updatedVideo: Video = {
     ...existingVideo,
     
-    title_ua: req.body.title_ua || req.body.title || existingVideo.title_ua,
-    title_en: req.body.title_en || existingVideo.title_en,
+    title: title,
     
-    description_ua: req.body.description_ua || req.body.description || existingVideo.description_ua,
-    description_en: req.body.description_en || existingVideo.description_en,
+    description: description,
 
     src: files?.video ? videoUrl(files.video[0].filename) ?? '' : existingVideo.src,
     image: req.body.removeImage === 'true' ? null : 

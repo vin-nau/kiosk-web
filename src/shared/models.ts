@@ -3,16 +3,14 @@ export type Faculty = {
   name: string,
   image: string
 };
+export type LocalizedString = string | { ua: string; en?: string } | null;
 
 export type InfoCard = {
   id: string,
-  title_ua: string,
-  title_en?: string,
-  subtitle_ua?: string | null,
-  subtitle_en?: string | null,
+  title: Exclude<LocalizedString, null>
+  subtitle?: LocalizedString,
   image?: string | null,
-  content_ua?: string | null,
-  content_en?: string | null,
+  content?: LocalizedString,
   
   // Category of the info, e.g. "students", "abiturients", "faculties"
   category: string,  
@@ -61,10 +59,8 @@ export type VideoSubtitle = {
 
 export type Video = {
   id: string;
-  title_ua: string;
-  title_en?: string;
-  description_ua: string;
-  description_en?: string;
+  title: Exclude<LocalizedString, null>;
+  description: LocalizedString;
   src: string;
   image: string | null;
   category: string;

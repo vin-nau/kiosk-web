@@ -7,6 +7,44 @@ import {initialCards} from "./initial-card.ts"
 
 let dbInstance: Database<sqlite3.Database, sqlite3.Statement> | null = null; 
 
+const serialize = (data: any): string | null => {
+    if (data === null || data === undefined) return null;
+    if (typeof data === 'string') return data;
+    return JSON.stringify(data);
+};
+
+const deserialize = (data: string | null): any => {
+    if (!data) return null;
+    try {
+        const parsed = JSON.parse(data);
+        if (parsed && typeof parsed === 'object') {
+            return parsed;
+        }
+        return data;
+    } catch (err) {
+        return data;
+    }
+};
+
+const mapRowToCard = (row: any): InfoCard => {
+    return {
+        ...row,
+        title: deserialize(row.title),
+        subtitle: deserialize(row.subtitle),
+        content: deserialize(row.content),
+        published: Boolean(row.published)
+    };
+};
+
+const mapRowToVideo = (row: any): Video => {
+    return {
+        ...row,
+        title: deserialize(row.title),
+        description: deserialize(row.description),
+        published: Boolean(row.published)
+    };
+};
+
 async function initDb() {
   const dbDir = "./data";
   const dbPath = path.join(dbDir, "app.db");
@@ -29,12 +67,9 @@ async function initDb() {
       await db.exec(`
         CREATE TABLE IF NOT EXISTS info_cards (
             id TEXT PRIMARY KEY,
-            title_ua TEXT NOT NULL,
-            title_en TEXT,
-            subtitle_ua TEXT,
-            subtitle_en TEXT,
-            content_ua TEXT,
-            content_en TEXT,
+            title TEXT NOT NULL,
+            subtitle TEXT,
+            content TEXT,
             image TEXT,
             category TEXT NOT NULL,
             subcategory TEXT,
@@ -47,13 +82,11 @@ async function initDb() {
       await db.exec(`
         CREATE TABLE IF NOT EXISTS videos (
           id TEXT PRIMARY KEY,
-          title_ua TEXT NOT NULL,
-          title_en TEXT,
+          title TEXT NOT NULL,
           src TEXT NOT NULL,
           image TEXT,
           category TEXT NOT NULL,
-          description_ua TEXT,
-          description_en TEXT,
+          description TEXT,
           published BOOLEAN DEFAULT TRUE,
           position INTEGER,
           date DATETIME DEFAULT CURRENT_TIMESTAMP
@@ -92,7 +125,8 @@ const infoCards = {
 
     const params = [category, limit].filter(Boolean);
 
-    return await db.all(select + where + unpublishedClause + orderClause + limitClause, params) as InfoCard[];
+    const rows = await db.all(select + where + unpublishedClause + orderClause + limitClause, params);
+    return rows.map(mapRowToCard);
   },
 
   async listCategories(): Promise<string[]> {
@@ -103,10 +137,13 @@ const infoCards = {
 
   async get(id: String, category?: string): Promise<InfoCard | null> {
     const db = getDbInstance();
+    let row;
     if (category) {
-      return await db.get(`SELECT * FROM info_cards WHERE id = ? AND category = ?`, [id, category]) as InfoCard | null;
+      row = await db.get(`SELECT * FROM info_cards WHERE id = ? AND category = ?`, [id, category]);
+    } else {
+      row = await db.get(`SELECT * FROM info_cards WHERE id = ?`, [id]); 
     }
-    return await db.get(`SELECT * FROM info_cards WHERE id = ?`, [id]) as InfoCard | null;
+    return row ? mapRowToCard(row) : null; 
   },
 
   async createList(cards: InfoCard[]) {
@@ -117,16 +154,16 @@ const infoCards = {
 
   async create(card: InfoCard): Promise<InfoCard> {
       const db = getDbInstance();
-      await db.run (`INSERT INTO info_cards (id, title_ua, title_en, subtitle_ua, subtitle_en, content_ua, content_en, image, category, subcategory, resource, position, published) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-          [card.id, card.title_ua, card.title_en, card.subtitle_ua, card.subtitle_en, card.content_ua, card.content_en, card.image, card.category, card.subcategory, card.resource, card.position, card.published]);
+      await db.run (`INSERT INTO info_cards (id, title, subtitle, content, image, category, subcategory, resource, position, published) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          [card.id, serialize(card.title), serialize(card.subtitle), serialize(card.content), card.image, card.category, card.subcategory, card.resource, card.position, card.published]);
       return card;
   },
 
   async update(card: InfoCard) {
       const db = getDbInstance();
       await db.run(
-          `UPDATE info_cards SET title_ua = ?, title_en = ?, subtitle_ua = ?, subtitle_en = ?, content_ua = ?, content_en = ?, image = ?, category = ?, subcategory = ?, resource = ?, position = ?, published = ? WHERE id = ?`,
-          [ card.title_ua, card.title_en, card.subtitle_ua, card.subtitle_en, card.content_ua, card.content_en, card.image, card.category, card.subcategory, card.resource, card.position, card.published, card.id ]
+          `UPDATE info_cards SET title = ?, subtitle = ?, content = ?, image = ?, category = ?, subcategory = ?, resource = ?, position = ?, published = ? WHERE id = ?`,
+          [ serialize(card.title), serialize(card.subtitle), serialize(card.content), card.image, card.category, card.subcategory, card.resource, card.position, card.published, card.id ]
       );
       return card;
   },
@@ -149,7 +186,9 @@ const videos = {
     const select = "SELECT * FROM videos";
     const where = includeUnpublished ? '' : ' WHERE published = TRUE';
     const order = " ORDER BY position DESC";
-    return await db.all(select + where + order) as Video[];    
+    const rows = await db.all(select + where + order);    
+  
+    return rows.map(mapRowToVideo);
   },
 
   async listCategories(): Promise<string[]> {
@@ -159,14 +198,16 @@ const videos = {
 
   async get(id: string): Promise<Video | null> {
     const db = getDbInstance();
-    return await db.get("SELECT * FROM videos WHERE id = ?", [id]) as Video | null;
+    const row = await db.get("SELECT * FROM videos WHERE id = ?", [id]);
+
+    return row ? mapRowToVideo(row): null;
   },
 
   async create(video: Video): Promise<Video> {
     const db = getDbInstance();
     await db.run(
-      `INSERT INTO videos (id, title_ua, title_en, src, image, category, description_ua, description_en, position, published) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [video.id, video.title_ua, video.title_en, video.src, video.image, video.category, video.description_ua, video.description_en, video.position, video.published]
+      `INSERT INTO videos (id, title, src, image, category, description, position, published) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      [video.id, serialize(video.title), video.src, video.image, video.category, serialize(video.description), video.position, video.published]
     );
     return video;
   },
@@ -175,9 +216,9 @@ const videos = {
     const db = getDbInstance();
     await db.run(
       `UPDATE videos 
-      SET title_ua = ?, title_en = ?, src = ?, image = ?, category = ?, description_ua = ?, description_en = ?, published = ?, position = ?
+      SET title = ?, src = ?, image = ?, category = ?, description = ?, published = ?, position = ?
       WHERE id = ?`,
-      [video.title_ua, video.title_en, video.src, video.image, video.category, video.description_ua, video.description_en, video.published, video.position, video.id]
+      [serialize(video.title), video.src, video.image, video.category, serialize(video.description), video.published, video.position, video.id]
     );
     return video;
   },

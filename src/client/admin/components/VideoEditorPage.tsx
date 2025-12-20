@@ -3,12 +3,20 @@ import { useParams, useNavigate, useLoaderData } from 'react-router-dom';
 import { useDropzone } from 'react-dropzone';
 import toast, { Toaster } from 'react-hot-toast';
 import './VideoEditorPage.css';
-import type { Video } from '../../../shared/models';
+import type { Video, LocalizedString } from '../../../shared/models';
 import config from '../../lib/config';
 import { videoCategoriesLoader } from '../lib/loaders';
 
 type PreviewFile = {
   preview: string;
+}
+
+const initValue = (val: LocalizedString | undefined, lang: 'ua' | 'en'): string => {
+  if (!val) return "";
+  if (typeof val === 'string') {
+    return lang === 'ua' ? val : "";
+  }
+  return (lang === 'en' ? val.en : val.ua) || "";
 }
 
 export function VideoEditorPage() {
@@ -17,14 +25,15 @@ export function VideoEditorPage() {
   const navigate = useNavigate();
   const isEditMode = Boolean(id);
 
-  const [formData, setFormData] = useState<Video>({
-    ...loadedVideo,
-    title_ua: loadedVideo?.title_ua || (loadedVideo as any)?.title || '', 
-    title_en: loadedVideo?.title_en || '',
-    
-    description_ua: loadedVideo?.description_ua || (loadedVideo as any)?.description || '', 
-    description_en: loadedVideo?.description_en || ''
-  });
+  const [title, setTitle] = useState(initValue(loadedVideo?.title, 'ua'));
+  const [titleEn, setTitleEn] = useState(initValue(loadedVideo?.title, 'en'));
+  const [description, setDescription] = useState(initValue(loadedVideo?.description, 'ua'));
+  const [descriptionEn, setDescriptionEn] = useState(initValue(loadedVideo?.description, 'en'));
+  
+  const [category, setCategory] = useState(loadedVideo?.category || '');
+  const [published, setPublished] = useState(loadedVideo?.published || false);
+  const [src] = useState(loadedVideo?.src || '');
+  const [image, setImage] = useState(loadedVideo?.image || null);
 
   const [videoFile, setVideoFile] = useState<File & PreviewFile | null>(null);
   const [imageFile, setImageFile] = useState<File & PreviewFile | null>(null);
@@ -111,7 +120,7 @@ export function VideoEditorPage() {
 
   useEffect(() => {
     const checkSubtitles = async () => {
-      if (!isEditMode || !id || !formData.src) return;
+      if (!isEditMode || !id || !src) return;
       
       const checkSubtitle = async (lang: 'uk' | 'en') => {
         try {
@@ -131,12 +140,12 @@ export function VideoEditorPage() {
     };
 
     checkSubtitles();
-  }, [isEditMode, id, formData.src]);
+  }, [isEditMode, id, src]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.title_ua || !formData.category) {
+    if (!title || !category) {
       toast.error('Заповніть всі обов\'язкові поля');
       return;
     }
@@ -150,12 +159,10 @@ export function VideoEditorPage() {
       setSaving(true);
 
       const formDataToSend = new FormData();
-      formDataToSend.append('title_ua', formData.title_ua);
-      formDataToSend.append('title_en', formData.title_en || "");
-      formDataToSend.append('category', formData.category);
-      formDataToSend.append('description_ua', formData.description_ua || "");
-      formDataToSend.append('description_en', formData.description_en || "");
-      formDataToSend.append('published', formData.published ? 'true' : 'false');
+      formDataToSend.append('title', JSON.stringify({ ua: title, en: titleEn }));
+      formDataToSend.append('description', JSON.stringify({ ua: description || "", en: descriptionEn || "" }));
+      formDataToSend.append('category', category);
+      formDataToSend.append('published', published ? 'true' : 'false');
 
       if (videoFile) {
         formDataToSend.append('video', videoFile);
@@ -171,7 +178,6 @@ export function VideoEditorPage() {
       }
 
       const url = isEditMode ? `/api/videos/${id}` : '/api/videos';
-      
       const method = isEditMode ? 'PUT' : 'POST';
 
       const response = await fetch(url, {
@@ -185,9 +191,11 @@ export function VideoEditorPage() {
       }
 
       toast.success(`Відео ${isEditMode ? 'оновлено' : 'створено'} успішно!`);
+      
       // Reset subtitle files after successful save
       setSubtitleUkFile(null);
       setSubtitleEnFile(null);
+      
       // Refresh subtitle availability
       if (isEditMode) {
         setTimeout(async () => {
@@ -215,25 +223,16 @@ export function VideoEditorPage() {
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value, type } = e.target;
-    const checked = (e.target as HTMLInputElement).checked;
-    setFormData({
-      ...formData,
-      [name]: type === 'checkbox' ? checked : value
-    });
-  };
-
   const handleRemoveImage = async () => {
     if (!id) return;
     
     try {
       setSaving(true);
       const formDataToSend = new FormData();
-      formDataToSend.append('title_ua', formData.title_ua);
-      formDataToSend.append('category', formData.category);
-      formDataToSend.append('description_ua', formData.description_ua || '');
-      formDataToSend.append('published', formData.published ? 'true' : 'false');
+      formDataToSend.append('title', JSON.stringify({ ua: title, en: titleEn }));
+      formDataToSend.append('category', category);
+      formDataToSend.append('description', JSON.stringify({ ua: description || "", en: descriptionEn || "" }));
+      formDataToSend.append('published', published ? 'true' : 'false');
       formDataToSend.append('removeImage', 'true');
 
       const response = await fetch(`/api/videos/${id}`, {
@@ -243,7 +242,7 @@ export function VideoEditorPage() {
 
       if (!response.ok) throw new Error('Помилка збереження');
       
-      setFormData({ ...formData, image: null });
+      setImage(null);
       toast.success('Зображення видалено');
     } catch (err) {
       toast.error('Не вдалося видалити зображення');
@@ -259,10 +258,10 @@ export function VideoEditorPage() {
     try {
       setSaving(true);
       const formDataToSend = new FormData();
-      formDataToSend.append('title', formData.title_ua);
-      formDataToSend.append('category', formData.category);
-      formDataToSend.append('description', formData.description_ua || '');
-      formDataToSend.append('published', formData.published ? 'true' : 'false');
+      formDataToSend.append('title', JSON.stringify({ ua: title, en: titleEn }));
+      formDataToSend.append('category', category);
+      formDataToSend.append('description', JSON.stringify({ ua: description || "", en: descriptionEn || "" }));
+      formDataToSend.append('published', published ? 'true' : 'false');
       formDataToSend.append('removeSubtitles', JSON.stringify([lang]));
 
       const response = await fetch(`/api/videos/${id}`, {
@@ -291,11 +290,11 @@ export function VideoEditorPage() {
           <div className="publish-toggle">
             <button 
               type="button"
-              className={`small ${formData.published ? 'published' : 'unpublished'}`}
-              onClick={() => setFormData({ ...formData, published: !formData.published })}
-              title={formData.published ? 'Відео опубліковано' : 'Відео не опубліковано'}
+              className={`small ${published ? 'published' : 'unpublished'}`}
+              onClick={() => setPublished(!published)}
+              title={published ? 'Відео опубліковано' : 'Відео не опубліковано'}
             >
-              {formData.published ? '✓ Опубліковано' : '○ Не опубліковано'}
+              {published ? '✓ Опубліковано' : '○ Не опубліковано'}
             </button>
           </div>
         </div>
@@ -314,9 +313,8 @@ export function VideoEditorPage() {
           <label title="Назва відео українською">Назва відео (UA):</label>
           <input
             type="text"
-            name="title_ua"
-            value={formData.title_ua || ""}
-            onChange={handleChange}
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
             required
             placeholder="Введіть назву відео українською"
           />
@@ -326,10 +324,8 @@ export function VideoEditorPage() {
           <label title="Назва відео англійською">Назва відео (EN):</label>
           <input
             type="text"
-            name="title_en"
-            value={formData.title_en || ""}
-            onChange={handleChange}
-            required
+            value={titleEn}
+            onChange={(e) => setTitleEn(e.target.value)}
             placeholder="Введіть назву відео англійською"
           />
         </div>
@@ -338,9 +334,9 @@ export function VideoEditorPage() {
           <label>
             Відео файл {!isEditMode && <span className="required">*</span>}
           </label>
-          {isEditMode && formData.src && !videoFile && (
+          {isEditMode && src && !videoFile && (
             <div className="file-info" style={{ marginBottom: '1em' }}>
-              Поточне відео: {formData.src}
+              Поточне відео: {src}
             </div>
           )}
           {videoFile && (
@@ -376,10 +372,10 @@ export function VideoEditorPage() {
                 alt="Нове зображення"
                 onLoad={() => { URL.revokeObjectURL(imageFile.preview) }}
               />
-            ) : formData.image && (
+            ) : image && (
               <div style={{ marginBottom: '10px' }}>
                 <img
-                  src={formData.image}
+                  src={image}
                   alt="Поточне зображення"
                   style={{ maxWidth: '100%', maxHeight: '200px', objectFit: 'contain' }}
                   onError={(e) => {
@@ -430,9 +426,8 @@ export function VideoEditorPage() {
           <input
             type="text"
             id="category"
-            name="category"
-            value={formData.category}
-            onChange={handleChange}
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
             list="category-suggestions"
             required
             placeholder="Введіть категорію"
@@ -445,26 +440,24 @@ export function VideoEditorPage() {
         </div>
 
         <div>
-          <label htmlFor="description_ua">Опис:</label>
+          <label htmlFor="description">Опис (UA):</label>
           <textarea
-            id="description_ua"
-            name="description_ua"
-            value={formData.description_ua}
-            onChange={handleChange}
+            id="description"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
             rows={5}
-            placeholder="Введіть опис відео українською "
+            placeholder="Введіть опис відео українською"
           />
         </div>
 
         <div>
-          <label htmlFor="description_en">Опис:</label>
+          <label htmlFor="description_en">Опис (EN):</label>
           <textarea
             id="description_en"
-            name="description_en"
-            value={formData.description_en}
-            onChange={handleChange}
+            value={descriptionEn}
+            onChange={(e) => setDescriptionEn(e.target.value)}
             rows={5}
-            placeholder="Введіть опис відео англійською "
+            placeholder="Введіть опис відео англійською"
           />
         </div>
 
