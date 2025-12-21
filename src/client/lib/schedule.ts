@@ -13,47 +13,49 @@ const localCache = new cache.Cache({
 
 const facultyImages: Map<string, string> = new Map([
   ['1',  '/img/faculties/agro.png'],
-  ['5',  '/img/faculties/economics.png'],
-  ['57', '/img/faculties/veterinarian.png'],
-  ['7',  '/img/faculties/itf.png'],
-  ['6',  '/img/faculties/management.png'],
-  ['42', '/img/faculties/finances.png'],
+  // ['111',  '/img/faculties/ecology.png'], //Екології немає в МКР
+  ['7',  '/img/faculties/itf.png'], //Інженерний
+  ['5',  '/img/faculties/economics.png'], //Економіки
+  ['42', '/img/faculties/finances.png'], //Обліку та аудиту
+  ['6',  '/img/faculties/management.png'], //Менеджменту
+   ['2',  '/img/faculties/plants.png'], // Технології виробництва
+  ['57', '/img/faculties/veterinarian.png'], // Ветеринарної медицини
+  
+  
+
+  // ['46', '/img/faculties/management.png'],  // Військова підготовка
+  // ['3',  '/img/faculties/management.png'],  // Інститут післядипломної освіти
+  // ['4',  '/img/faculties/management.png'], // Аспірантура
 ]);
 
-//will be changed in the next fix
 const chairImages: Map<string, string> = new Map([
-  ['182', '/img/faculties/itf.png'], // Комп`ютерних наук та економічної кібернетики
-  ['29',  '/img/faculties/itf.png'], // Математики, фізики та коп'ютерних технологій
-  ['220', '/img/faculties/itf.png'], // Математики
-  ['147', '/img/faculties/itf.png'], // Електроенертетики, електротехніки та електромеханіки
-  ['219', '/img/faculties/itf.png'], // Кафедра електричної та телекомунікаційної інженерії
-  ['218', '/img/faculties/itf.png'], // Кафедра системотехніки та сервісної інженерії
-  ['181', '/img/faculties/itf.png'], // Агроінженерії та технічного сервісу
-  ['14',  '/img/faculties/itf.png'], // Інженерної механіки та технологічних процесів в АПК
-  ['17',  '/img/faculties/itf.png'], // Машин та обладнання сільськогосподарського виробництва
-  ['110', '/img/faculties/itf.png'], // Деканат ІТФ
 
-  // === Агрономія та Екологія (Agro) ===
+  // Агрономія 
   ['1',   '/img/faculties/agro.png'], // Ботаніки, генетики та захисту рослин
   ['2',   '/img/faculties/agro.png'], // Землеробства, ґрунтознавства та агрохімії
   ['4',   '/img/faculties/agro.png'], // Рослинництва та садівництва
-  ['6',   '/img/faculties/agro.png'], // Лісового та садово-паркового господарства
-  ['3',   '/img/faculties/agro.png'], // Екології та охорони навколишнього середовища
-  ['211', '/img/faculties/agro.png'], // Біоінженерії, біо- та харчових технологій
-  ['12',  '/img/faculties/agro.png'], // Харчових технологій та мікробіології
 
-  // === Ветеринарія та Тваринництво (Veterinarian) ===
-  ['215', '/img/faculties/veterinarian.png'], // Ветеринарної медицини...
-  ['216', '/img/faculties/veterinarian.png'], // Хірургії, терапії, вірусології...
-  ['10',  '/img/faculties/veterinarian.png'], // Ветеринарної гігієни, санітарії та експертизи
-  ['213', '/img/faculties/veterinarian.png'], // Охорони праці та біотехнічних систем у тваринництві
-  ['214', '/img/faculties/veterinarian.png'], // Технології виробництва та переробки продукції тваринництва
-  ['212', '/img/faculties/veterinarian.png'], // Технології розведення... дрібних тварин
-  ['7',   '/img/faculties/veterinarian.png'], // Технології виробництва продуктів тваринництва...
-  ['11',  '/img/faculties/veterinarian.png'], // Годівлі сільськогосподарських тварин...
 
-  // === Економіка (Economics) ===
+  //Екології
+  ['6',   '/img/faculties/ecology.png'], // Лісового та садово-паркового господарства
+  ['3',   '/img/faculties/ecology.png'], // Екології та охорони навколишнього середовища
+
+
+  //Інженерно-технологічний
+  ['181', '/img/faculties/itf.png'], // Агроінженерії та технічного сервісу
+  ['147', '/img/faculties/itf.png'], // Електроенертетики, електротехніки та електромеханіки
+  ['17',  '/img/faculties/itf.png'], // Машин та обладнання сільськогосподарського виробництва
+  ['14',  '/img/faculties/itf.png'], // Інженерної механіки та технологічних процесів в АПК
+  ['29',  '/img/faculties/itf.png'], // Математики, фізики та коп'ютерних технологій
+  ['220', '/img/faculties/itf.png'], // Математики
+  ['219', '/img/faculties/itf.png'], // Кафедра електричної та телекомунікаційної інженерії
+  ['218', '/img/faculties/itf.png'], // Кафедра системотехніки та сервісної інженерії
+  ['110', '/img/faculties/itf.png'], // Деканат ІТФ
+
+  
+  //Економіки
   ['143', '/img/faculties/economics.png'], // Економіки та підприємницької діяльності
+  ['182', '/img/faculties/economics.png'], // Комп`ютерних наук та економічної кібернетики
   ['165', '/img/faculties/economics.png'], // Аналізу та статистики
   ['20',  '/img/faculties/economics.png'], // Бізнесу та сфери обслуговування
   ['217', '/img/faculties/economics.png'], // Альтернативних джерел енергії та аграрної економіки
@@ -65,18 +67,55 @@ const chairImages: Map<string, string> = new Map([
   ['76',  '/img/faculties/finances.png'], // Аналізу та аудиту
   ['26',  '/img/faculties/finances.png'], // Обліку та оподаткування
 
-  // === Менеджмент, Право та Інше (Management) ===
+
+    // === Менеджмент, Право та Інше (Management) ===
   ['145', '/img/faculties/management.png'], // Адміністративного менеджменту...
   ['23',  '/img/faculties/management.png'], // Аграрного менеджменту та маркетингу
-  ['24',  '/img/faculties/management.png'], // Права
   ['18',  '/img/faculties/management.png'], // Української та іноземних мов
   ['21',  '/img/faculties/management.png'], // Історії України та філософії
+  ['24',  '/img/faculties/management.png'], // Права
+
+
+  // технології виробництва 
+  ['211', '/img/faculties/plants.png'], // Біоінженерії, біо- та харчових технологій
+  ['12',  '/img/faculties/plants.png'], // Харчових технологій та мікробіології
+  ['214', '/img/faculties/plants.png'], // Технології виробництва та переробки продукції тваринництва
+  ['7',   '/img/faculties/plants.png'], // Технології виробництва продуктів тваринництва...
+  ['11',  '/img/faculties/plants.png'], // Годівлі сільськогосподарських тварин...
+  ['213', '/img/faculties/plants.png'], // Охорони праці та біотехнічних систем у тваринництві
+  ['212', '/img/faculties/plants.png'], // Технології розведення... дрібних тварин
+
+
+  //Ветеринарної медицини
+  ['215', '/img/faculties/veterinarian.png'], // Ветеринарної медицини...
+  ['10',  '/img/faculties/veterinarian.png'], // Ветеринарної гігієни, санітарії та експертизи
+  ['216', '/img/faculties/veterinarian.png'], // Хірургії, терапії, вірусології...
+
+
   ['175', '/img/faculties/management.png'], // Кафедра військової підготовки
   ['30',  '/img/faculties/management.png'], // Військова кафедра
   ['94',  '/img/faculties/management.png'], // Інститут післядипломної освіти
-  
 ]);
 
+const facultyChairs: Record<string, string[]> = {
+  '1': ['1', '2', '4', '3', '6'], // Агрономія 
+
+  '111': ['3', '6'], //Екології немає в МКР
+
+  '7': ['181', '147', '17', '14', '29', '220', '219', '218', '110'], //Інженерний
+
+  '5': ['143', '182', '165', '20', '217', '112'], // Економіка 
+
+  '42': ['122', '28', '76', '26'], // Фінанси 
+
+  '6': ['145', '23', '18', '21', '24'], // Менеджмент
+
+  '2': ['211', '12', '214', '7', '11', '213', '212'], // технології виробництва 
+
+  // Ветеринарія 
+  '57': ['215', '10', '216'], // Ветеринарія 
+  
+};
 
 async function getFaculties(): Promise<Faculty[]> {
   const cached = localCache.get('faculties');
@@ -100,6 +139,17 @@ async function getFaculties(): Promise<Faculty[]> {
   
   localCache.set('faculties', itemsWithImages);
   return itemsWithImages;
+}
+
+async function getFacultyChairs(facultyId: string): Promise<Chairs[]> {
+  const allChairs = await getChairs()
+
+  const allowedIds = facultyChairs[facultyId];
+
+  if (!allowedIds) {
+    return [];
+  }
+  return allChairs.filter(chair => allowedIds.includes(String(chair.id)));
 }
 
 async function getChairs(): Promise<Chairs[]> {
@@ -199,7 +249,7 @@ const lessonHours = [
 function getLessonHours() { return lessonHours; }
 
 export { 
-    getFaculties, getFacultyGroups, getGroupSchedule, 
+    getFaculties, getFacultyChairs, getFacultyGroups, getGroupSchedule, 
     getChairs, getChairTeachers, getTeacherSchedule,
     getCourseName, getLessonHours 
 };

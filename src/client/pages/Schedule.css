@@ -69,7 +69,6 @@
   padding: 0;
   flex-shrink: 0;
   min-width: 120px;
-  max-width: 180px;
 }
 
 .schedule-container {
@@ -83,3 +82,71 @@
 .content {
   margin-top: 1em;
 }
+
+.teacher-flow-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 10px; 
+  margin-top: 0;
+  overflow: hidden; 
+}
+
+.teacher-slider {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important; 
+  overflow-x: auto !important;  
+  overflow-y: hidden !important;
+  
+  width: 100%;
+  gap: 15px; 
+  padding: 10px 5px 15px 5px; 
+  align-items: flex-start; 
+  
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.teacher-slider::-webkit-scrollbar { 
+  display: none; 
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+.teacher-slider .info-card {
+  flex: 0 0 auto !important; 
+  margin-bottom: 0 !important;
+}
+
+.teacher-slider .info-card.minimized {
+  width: 16em !important;
+  min-width: 16em !important;
+  height: auto !important;
+}
+
+.teacher-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 40px;
+  justify-items: center;
+  width: 100%;
+  padding: 10px;
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+.schedule-wrapper-bounded {
+  width: 100%;
+  min-height: 100px;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  margin-top: 10px;
+}
+
+.schedule-container {
+  width: 100%;
+  animation: fadeIn 0.5s ease-in-out;
+}
+
