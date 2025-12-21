@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, useTransition } from 'react';
 import type { InfoCard, LocalizedString } from "../../../shared/models";
 import { useLoaderData, useNavigate, useParams } from 'react-router';
 import { useDropzone } from 'react-dropzone';
@@ -8,18 +8,13 @@ import Editor from 'react-simple-wysiwyg';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChain } from '@fortawesome/free-solid-svg-icons';
 import { categoriesLoader } from '../lib/loaders';
+import { getLocalizedText } from '../../lib/localization';
 
 type PreviewFile = {
   preview: string;
 }
 
-const initValue = (val: LocalizedString | undefined, lang: 'ua' | 'en'): string => {
-  if (!val) return "";
-  if (typeof val === 'string') {
-    return lang === 'ua' ? val : "";
-  }
-  return (lang === 'en' ? val.en : val.ua) || "";
-}
+
 
 function SubcategoryEdit({ subcategory, onChange, suggestions }: { subcategory: string, onChange: (subcategory: string) => void, suggestions: string[] }) {
   const handleSubcategoryChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -89,14 +84,14 @@ function CardEditorPage({ create }: { create?: boolean }) {
 
   const url = `/api/info/${card.category}`;
 
-  const [title, setTitle] = useState(initValue(card.title, 'ua'));
-  const [titleEn, setTitleEn] = useState(initValue(card.title, 'en'));
+  const [title, setTitle] = useState(getLocalizedText(card.title, 'ua'));
+  const [titleEn, setTitleEn] = useState(getLocalizedText(card.title, 'en'));
 
-  const [subtitle, setSubtitle] = useState(initValue(card.subtitle, 'ua'));
-  const [subtitleEn, setSubtitleEn] = useState(initValue(card.subtitle, 'en'));
+  const [subtitle, setSubtitle] = useState(getLocalizedText(card.subtitle, 'ua'));
+  const [subtitleEn, setSubtitleEn] = useState(getLocalizedText(card.subtitle, 'en'));
 
-  const [content, setContent] = useState<string | null>(initValue(card.content, 'ua'));
-  const [contentEn, setContentEn] = useState<string | null>(initValue(card.content, 'en'));
+  const [content, setContent] = useState<string | null>(getLocalizedText(card.content, 'ua'));
+  const [contentEn, setContentEn] = useState<string | null>(getLocalizedText(card.content, 'en'));
 
   const [image, setImage] = useState(card.image);
   const [category, setCategory] = useState(card.category ?? '');

@@ -6,17 +6,10 @@ import './VideoEditorPage.css';
 import type { Video, LocalizedString } from '../../../shared/models';
 import config from '../../lib/config';
 import { videoCategoriesLoader } from '../lib/loaders';
+import { getLocalizedText } from '../../lib/localization';
 
 type PreviewFile = {
   preview: string;
-}
-
-const initValue = (val: LocalizedString | undefined, lang: 'ua' | 'en'): string => {
-  if (!val) return "";
-  if (typeof val === 'string') {
-    return lang === 'ua' ? val : "";
-  }
-  return (lang === 'en' ? val.en : val.ua) || "";
 }
 
 export function VideoEditorPage() {
@@ -25,10 +18,10 @@ export function VideoEditorPage() {
   const navigate = useNavigate();
   const isEditMode = Boolean(id);
 
-  const [title, setTitle] = useState(initValue(loadedVideo?.title, 'ua'));
-  const [titleEn, setTitleEn] = useState(initValue(loadedVideo?.title, 'en'));
-  const [description, setDescription] = useState(initValue(loadedVideo?.description, 'ua'));
-  const [descriptionEn, setDescriptionEn] = useState(initValue(loadedVideo?.description, 'en'));
+  const [title, setTitle] = useState(getLocalizedText(loadedVideo?.title, 'ua'));
+  const [titleEn, setTitleEn] = useState(getLocalizedText(loadedVideo?.title, 'en'));
+  const [description, setDescription] = useState(getLocalizedText(loadedVideo?.description, 'ua'));
+  const [descriptionEn, setDescriptionEn] = useState(getLocalizedText(loadedVideo?.description, 'en'));
   
   const [category, setCategory] = useState(loadedVideo?.category || '');
   const [published, setPublished] = useState(loadedVideo?.published || false);

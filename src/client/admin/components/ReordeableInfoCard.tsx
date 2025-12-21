@@ -1,10 +1,12 @@
 import { Reorder, useMotionValue } from "motion/react";
+import { useTranslation } from "react-i18next";
 import { useRaisedShadow } from "../lib/raised-shadow";
 import type { InfoCard, LocalizedString } from "../../../shared/models";
 import './ReordeableInfoCard.css';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEye, faEyeSlash, faFilePen, faLink, faList, faRotate, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { NavLink } from "react-router";
+import { getLocalizedText } from "../../lib/localization";
 
 interface Props {
   card: InfoCard;
@@ -14,19 +16,15 @@ interface Props {
   onSync: () => void;
 }
 
-function getLocalizedText(value: LocalizedString | undefined): string {
-  if (!value) return "";
-  if (typeof value === 'string') return value;
-  return value.ua || value.en || "";
-}
 
 export const ReordeableInfoCard = ({ card, adminUrlPrefix, onDelete, onPublishingChanged, onSync }: Props) => {
+  const { i18n } = useTranslation();
   const y = useMotionValue(0);
   const boxShadow = useRaisedShadow(y);
 
-  const title = getLocalizedText(card.title);
-  const subtitle = getLocalizedText(card.subtitle);
-  const content = getLocalizedText(card.content);
+  const title = getLocalizedText(card.title, i18n.language);
+  const subtitle = getLocalizedText(card.subtitle, i18n.language);
+  const content = getLocalizedText(card.content, i18n.language);
 
   return (
     <Reorder.Item value={card} id={card.id} className="card" style={{ boxShadow, y }}>      

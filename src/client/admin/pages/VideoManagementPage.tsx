@@ -7,16 +7,14 @@ import { faEye, faEyeSlash, faFilePen, faIcons, faSquarePlus, faTrash } from '@f
 import config from '../../lib/config';
 import toast, { Toaster } from 'react-hot-toast';
 import performWithUndo from '../lib/undo';
+import { useTranslation } from "react-i18next";
+import { getLocalizedText } from '../../lib/localization';
 
-function getLocalizedText(value: LocalizedString | undefined): string {
-  if (!value) return "";
-  if (typeof value === 'string') return value;
-  return value.ua || value.en || "";
-}
 
 export function VideoManagementPage() {
   const loadedVideos = useLoaderData<Video[]>();
   const [videos, setVideos] = useState<Video[]>(loadedVideos || []);
+  const {i18n} = useTranslation();
 
   const handleDelete = (video: Video) => {
     const index = videos.indexOf(video);
@@ -83,37 +81,42 @@ export function VideoManagementPage() {
         } 
         <ul>
         {          
-          videos.map(video => (
-            <li key={video.id} className="card video">            
-              <div className="card-content">
-                {video.image ? <img src={video.image} alt={getLocalizedText(video.title)} className="preview" /> : (
-                  <div className="preview">📹</div>
-                )}
+          videos.map(video => {
+            const title = getLocalizedText(video.title, i18n.language);
 
-                <div className="video-content">
-                  <NavLink to={`/admin/categories/videos/${video.id}/edit`}>
-                    <h3>{getLocalizedText(video.title)}</h3>
-                  </NavLink>                
-                  <div><FontAwesomeIcon icon={faIcons} /> {video.category}</div>
+            return (
+              <li key={video.id} className="card video">            
+                <div className="card-content">
+                  {video.image ? <img src={video.image} alt={title} className="preview" /> : (
+                    <div className="preview">📹</div>
+                  )}
+
+                  <div className="video-content">
+                    <NavLink to={`/admin/categories/videos/${video.id}/edit`}>
+                      <h3>{title}</h3>
+                    </NavLink>                
+                    <div><FontAwesomeIcon icon={faIcons} /> {video.category}</div>
+                  </div>
                 </div>
-              </div>
 
-              <div className="actions">
-                <FontAwesomeIcon 
-                  title={video.published ? 'Приховати' : 'Опублікувати'} 
-                  className="action-btn" 
-                  icon={video.published ? faEye : faEyeSlash} 
-                  onClick={() => togglePublishing(video)} 
-                />
-                &nbsp;
-                <NavLink to={`/admin/categories/videos/${video.id}/edit`} className="action-btn">
-                  <FontAwesomeIcon title="Редагувати" className="action-btn" icon={faFilePen} />
-                </NavLink>
-                &nbsp;
-                <FontAwesomeIcon title="Видалити відео" className="action-btn" icon={faTrash} onClick={() => handleDelete(video)} />
-              </div>
-            </li>
-        ))}
+                <div className="actions">
+                  <FontAwesomeIcon 
+                    title={video.published ? 'Приховати' : 'Опублікувати'} 
+                    className="action-btn" 
+                    icon={video.published ? faEye : faEyeSlash} 
+                    onClick={() => togglePublishing(video)} 
+                  />
+                  &nbsp;
+                  <NavLink to={`/admin/categories/videos/${video.id}/edit`} className="action-btn">
+                    <FontAwesomeIcon title="Редагувати" className="action-btn" icon={faFilePen} />
+                  </NavLink>
+                  &nbsp;
+                  <FontAwesomeIcon title="Видалити відео" className="action-btn" icon={faTrash} onClick={() => handleDelete(video)} />
+                </div>
+              </li>
+            );
+          })
+        }
         </ul>
       </div>
   );
