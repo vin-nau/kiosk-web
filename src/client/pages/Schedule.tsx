@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { motion } from "motion/react";
-import type { MkrEvent, MkrGroup, Teachers } from "../../shared/models";
+import type { MkrEvent, MkrGroup, Chairs, Teachers } from "../../shared/models";
 import './Schedule.css';
 import { 
-  getFacultyGroups, getFaculties, getGroupSchedule, getCourseName, getLessonHours,
-  getChairs, getChairTeachers, getTeacherSchedule 
+  getFacultyGroups, getFaculties, getFacultyChairs, getGroupSchedule, getCourseName, getLessonHours,
+  getChairTeachers, getTeacherSchedule 
 } from "../lib/schedule";
 import CardButton, { CardSize } from "../components/cards/CardButton";
 import GroupSchedule from "../components/GroupSchedule";
@@ -25,7 +25,8 @@ type GenericItem = {
 const lessonHours = getLessonHours();
 
 function DetailsContent({ parentId, mode, onClose }: { parentId: string | number, mode: ScheduleMode, onClose: () => void }) {
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loadingChairs, setLoadingChairs] = useState<boolean>(false);
+  const [loadingSchedule, setLoadingSchedule] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
   const [groups, setGroups] = useState<Map<number, MkrGroup[]> | null>(null);
@@ -33,42 +34,42 @@ function DetailsContent({ parentId, mode, onClose }: { parentId: string | number
   const [courseGroups, setCourseGroups] = useState<MkrGroup[] | null>(null);
   const [currentGroup, setCurrentGroup] = useState<MkrGroup | null>(null);
 
+  const [chairs, setChairs] = useState<Chairs[] | null>(null);
+  const [activeChair, setActiveChair] = useState<Chairs | null>(null);
   const [teachers, setTeachers] = useState<Teachers[] | null>(null);
   const [currentTeacher, setCurrentTeacher] = useState<Teachers | null>(null);
 
   const [currentSchedule, setCurrentSchedule] = useState<MkrEvent[] | null>(null);
 
   useEffect(() => {
-    setLoading(true);
     setError(null);
-    setGroups(null);
-    setTeachers(null);
-    setCourseGroups(null);
-    setActiveCourse(null);
-    setCurrentGroup(null);
-    setCurrentTeacher(null);
-    setCurrentSchedule(null);
+    setGroups(null); setChairs(null); setActiveChair(null);
+    setTeachers(null); setCourseGroups(null); setActiveCourse(null);
+    setCurrentGroup(null); setCurrentTeacher(null); setCurrentSchedule(null);
 
     if (mode === 'students') {
-      getFacultyGroups(String(parentId)).then(s => {
-        setGroups(s);
-        setLoading(false);
-      }).catch(err => {
-        console.error(err);
-        setError("Не вдалося завантажити групи");
-        setLoading(false);
-      });
+      getFacultyGroups(String(parentId)).then(setGroups).catch(e => setError("Помилка завантаження груп"));
     } else {
-      getChairTeachers(Number(parentId)).then(s => {
-        setTeachers(s);
-        setLoading(false);
-      }).catch(err => {
-        console.error(err);
-        setError("Не вдалося завантажити викладачів");
-        setLoading(false);
-      });
+      setLoadingChairs(true);
+      getFacultyChairs(String(parentId)).then(s => {
+         setChairs(s);
+         setLoadingChairs(false);
+       }).catch(e => {
+         setError("Помилка завантаження кафедр");
+         setLoadingChairs(false);
+       });
     }
   }, [parentId, mode]);
+
+  useEffect(() => {
+    if (mode === 'teachers' && activeChair) {
+        getChairTeachers(Number(activeChair.id)).then(setTeachers);
+        setCurrentTeacher(null);
+        setCurrentSchedule(null);
+    } else if (mode === 'teachers' && !activeChair) {
+        setTeachers(null);
+    }
+  }, [activeChair, mode]);
 
   useEffect(() => {
     if (mode === 'students' && activeCourse !== null && groups) {
@@ -83,11 +84,10 @@ function DetailsContent({ parentId, mode, onClose }: { parentId: string | number
       setCurrentSchedule(null);
       return;
     }
-
-    setLoading(true);
+    setLoadingSchedule(true);
     setCurrentSchedule(null);
 
-    const fetchSchedule = async () => {
+    const fetch = async () => {
       try {
         let s: MkrEvent[] = [];
         if (mode === 'students' && currentGroup) {
@@ -96,83 +96,135 @@ function DetailsContent({ parentId, mode, onClose }: { parentId: string | number
           s = await getTeacherSchedule(Number(parentId), currentTeacher.id);
         }
         setCurrentSchedule(s);
-      } catch (err) {
-        console.error(err);
-        setError("Не вдалося завантажити розклад");
-      } finally {
-        setLoading(false);
-      }
+      } catch (err) { setError("Не вдалося завантажити розклад"); } 
+      finally { setLoadingSchedule(false); }
     };
-
-    fetchSchedule();
+    fetch();
   }, [currentGroup, currentTeacher, parentId, mode]);
 
+
+  const getButtonPosition = () => {
+    if (mode === 'teachers' && activeChair) {
+        return { top: '2.5em', right: '-1em' }; 
+    }
+    
+    if (mode === 'teachers' && !activeChair) {
+        return { top: '10px', right: '10px' }; 
+    }
+
+    if (mode === 'students') {
+        return { top: '2.5em', right: '0.6em' };
+    }
+
+    return { top: '10px', right: '10px' };
+  };
+
+  const buttonStyle = getButtonPosition();
+
+  const handleBack = () => {
+     if (mode === 'teachers') {
+        if (currentTeacher) setCurrentTeacher(null);
+        else if (activeChair) setActiveChair(null);
+        else onClose();
+     } else {
+        onClose();
+     }
+  };
+
   return (
-    <div className="active-info">
-      <div style={{ position: 'absolute', right: mode === 'teachers' ? '-10px' : '20px', top: '20px', zIndex: 100 }}>
-        <CloseButton onClick={onClose} />
+    <div className="active-info"> 
+      
+      <div style={{
+          position: 'absolute',
+          top: buttonStyle.top, 
+          right: buttonStyle.right, 
+          zIndex: 200
+      }}>
+        <CloseButton onClick={handleBack} />
       </div>
+
       <section>
         <div className="content">
-          
           {mode === 'students' && groups && (
-            <div className="courses">
-              {Array.from(groups.keys()).sort().map((course) => (
-                <CardButton
-                  key={course}
-                  title={getCourseName(course)}
-                  size={CardSize.Micro}
-                  active={activeCourse === course}
-                  onClick={() => setActiveCourse(course)}
-                />
-              ))}
-            </div>
-          )}
-
-          {mode === 'teachers' && teachers && (
-             <div className="courses">
-                 {teachers.map((teacher) => (
-                    <CardButton
-                      key={teacher.id}
-                      title={teacher.name}
-                      size={CardSize.Minimized}
-                      active={currentTeacher?.id === teacher.id}
-                      onClick={() => setCurrentTeacher(teacher)}
-                    />
-                 ))}
-             </div>
-          )}
-
-
-          <div 
-             className="groups-schedule"
-             style={mode === 'teachers' ? { justifyContent: 'center' } : {}}
-          >
-              
-             {mode === 'students' && courseGroups && (
-                <div className="groups">
-                  {courseGroups.map((group) => (
-                    <CardButton
-                      key={group.id}
-                      title={group.name}
-                      size={CardSize.Micro}
-                      active={currentGroup?.id === group.id}
-                      onClick={() => setCurrentGroup(group)}
+            <>
+                <div className="courses">
+                  {Array.from(groups.keys()).sort().map((course) => (
+                    <CardButton key={course} title={getCourseName(course)} size={CardSize.Micro}
+                      active={activeCourse === course} onClick={() => setActiveCourse(course)}
                     />
                   ))}
                 </div>
-             )}
+                
+                <div className="groups-schedule">
+                    {courseGroups && (
+                        <div className="groups">
+                        {courseGroups.map((group) => (
+                            <CardButton key={group.id} title={group.name} size={CardSize.Micro}
+                            active={currentGroup?.id === group.id} onClick={() => setCurrentGroup(group)}
+                            />
+                        ))}
+                        </div>
+                    )}
+                    
+                    <div className="schedule-wrapper-bounded">
+                        {loadingSchedule && <Loader />}
+                        {!loadingSchedule && currentSchedule && (
+                            <div className="schedule-container">
+                                <GroupSchedule schedule={currentSchedule} lessonHours={lessonHours} />
+                            </div>
+                        )}
+                        <ErrorOverlay error={error} />
+                    </div>
+                </div>
+            </>
+          )}
 
-             {currentSchedule != null && (
-                 <div className="schedule-container">
-                    <GroupSchedule schedule={currentSchedule} lessonHours={lessonHours} />
-                 </div>
-             )}
-             
-             <ErrorOverlay error={error} />
-             {loading && <Loader />}
-             
-          </div>
+          {mode === 'teachers' && (
+             <div className="teacher-flow-container">
+                
+                {loadingChairs && <div style={{width:'100%', display:'flex', justifyContent:'center'}}><Loader/></div>}
+                
+                {chairs && (
+                   <div className={activeChair ? "teacher-slider" : "teacher-grid"}>
+                      {chairs.map((chair) => (
+                        <CardButton
+                          key={chair.id}
+                          title={chair.name}
+                          size={activeChair ? CardSize.Minimized : CardSize.Full} 
+                          active={activeChair?.id === chair.id}
+                          image={chair.image} 
+                          onClick={() => setActiveChair(chair)}
+                        />
+                      ))}
+                   </div>
+                )}
+
+                {activeChair && teachers && (
+                   <div className="teacher-slider fade-in">
+                       {teachers.map((teacher) => (
+                         <CardButton
+                           key={teacher.id}
+                           title={teacher.name}
+                           size={CardSize.Minimized} 
+                           active={currentTeacher?.id === teacher.id}
+                           onClick={() => setCurrentTeacher(teacher)}
+                         />
+                       ))}
+                   </div>
+                )}
+
+                <div className="schedule-wrapper-bounded" style={{ marginTop: '10px' }}>
+                    {loadingSchedule && <Loader />}
+                    
+                    {!loadingSchedule && currentSchedule && (
+                        <div className="schedule-container fade-in">
+                             <GroupSchedule schedule={currentSchedule} lessonHours={lessonHours} />
+                        </div>
+                    )}
+                    <ErrorOverlay error={error} />
+                </div>
+             </div>
+          )}
 
         </div>
       </section>
@@ -195,7 +247,7 @@ function GenericList({ items, activeId, onSelect, mode, onCloseParent }: { items
              </div>
              
              <div className="content" style={{ textAlign: 'center', opacity: 0.8 }}>
-                <p>Оберіть {mode === 'students' ? 'факультет' : 'кафедру'} зі списку нижче:</p>
+                <p>Оберіть {mode === 'students' ? 'факультет' : 'факультет'} зі списку нижче:</p>
              </div>
         </div>
       )}
@@ -240,13 +292,9 @@ function ActiveScheduleMode({ mode, onClose }: { mode: ScheduleMode, onClose: ()
 
     const fetchData = async () => {
       try {
-        if (mode === 'students') {
-          const data = await getFaculties();
-          setItems(data);
-        } else {
-          const data = await getChairs();
-          setItems(data);
-        }
+        const data = await getFaculties();
+        setItems(data);
+        
       } catch (e) {
         console.error(e);
       } finally {
@@ -281,17 +329,17 @@ function ActiveScheduleMode({ mode, onClose }: { mode: ScheduleMode, onClose: ()
 
 function ScheduleModesList({ active, onSelect }: { active: ScheduleMode | null, onSelect: (m: ScheduleMode) => void }) {
   const size = active == null ? CardSize.Full : CardSize.Minimized;
-  //will be changed in the next fix
+  
   const modes = [
     { 
         id: 'students', 
         title: 'Розклад для студентів',
-        image: '/img/faculties/agro.png' 
+        image: '/img/students/about.png' 
     },
     { 
         id: 'teachers', 
         title: 'Розклад для викладачів',
-        image: '/img/faculties/agro.png' 
+        image: '/img/students/about.png' 
     }
   ];
 
