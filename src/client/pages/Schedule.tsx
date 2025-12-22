@@ -92,15 +92,15 @@ function DetailsContent({ parentId, mode, onClose }: { parentId: string | number
         let s: MkrEvent[] = [];
         if (mode === 'students' && currentGroup) {
           s = await getGroupSchedule(String(parentId), currentGroup.course, currentGroup.id);
-        } else if (mode === 'teachers' && currentTeacher) {
-          s = await getTeacherSchedule(Number(parentId), currentTeacher.id);
+        } else if (mode === 'teachers' && currentTeacher && activeChair) {
+          s = await getTeacherSchedule(Number(activeChair.id), currentTeacher.id);
         }
         setCurrentSchedule(s);
       } catch (err) { setError("Не вдалося завантажити розклад"); } 
       finally { setLoadingSchedule(false); }
     };
     fetch();
-  }, [currentGroup, currentTeacher, parentId, mode]);
+  }, [currentGroup, currentTeacher, parentId, mode, activeChair]);
 
 
   const getButtonPosition = () => {
