@@ -8,7 +8,7 @@ export enum CardSize {
 }
 
 type ButtonProps = {
-  title: string,
+  title?: string | null,
   subtitle?: string | null,
   image?: string | null,
   active?: boolean,
@@ -18,7 +18,10 @@ type ButtonProps = {
 };
 
 export default function CardButton({ title, subtitle, image, active, onClick, size, empty }: ButtonProps) {
-  const downsizeText = title.length > 50;
+  const safeTitle = title || "";
+  
+  const downsizeText = safeTitle.length > 50;
+
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.9 }}
@@ -30,9 +33,9 @@ export default function CardButton({ title, subtitle, image, active, onClick, si
       onClick={ () => {        
         if (onClick) onClick()
       }}>      
-        { image ? <img src={image} alt={title} /> : <></> }   
+        { image ? <img src={image} alt={safeTitle} /> : <></> }   
         <div className="card-text">
-          <h3>{title}</h3>      
+          <h3>{safeTitle}</h3>      
           { (size != CardSize.Minimized && subtitle) ? <p className="subtitle">{subtitle}</p> : <></> }
         </div>
     </motion.div>

@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useState } from 'react';
-import type { InfoCard } from "../../../shared/models";
+import { useCallback, useEffect, useState, useTransition } from 'react';
+import type { InfoCard, LocalizedString } from "../../../shared/models";
 import { useLoaderData, useNavigate, useParams } from 'react-router';
 import { useDropzone } from 'react-dropzone';
 import toast, { Toaster } from 'react-hot-toast';
@@ -8,10 +8,13 @@ import Editor from 'react-simple-wysiwyg';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChain } from '@fortawesome/free-solid-svg-icons';
 import { categoriesLoader } from '../lib/loaders';
+import { getLocalizedText } from '../../lib/localization';
 
 type PreviewFile = {
   preview: string;
 }
+
+
 
 function SubcategoryEdit({ subcategory, onChange, suggestions }: { subcategory: string, onChange: (subcategory: string) => void, suggestions: string[] }) {
   const handleSubcategoryChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -41,10 +44,12 @@ function SubcategoryEdit({ subcategory, onChange, suggestions }: { subcategory: 
 
 async function updateInfo(card: InfoCard, imageFile: File | null, create: boolean, url: string): Promise<boolean> {
   const formData = new FormData();
-  formData.append('title', card.title);
+  formData.append('title', JSON.stringify(card.title));
+  formData.append('subtitle', JSON.stringify(card.subtitle));
+  formData.append('content', JSON.stringify(card.content));
+
   if (card.category) formData.append('category', card.category);
-  if (card.subtitle) formData.append('subtitle', card.subtitle);
-  if (card.content) formData.append('content', card.content);
+
   if (card.subcategory) formData.append('subcategory', card.subcategory);
 
   if (imageFile) {
@@ -79,9 +84,15 @@ function CardEditorPage({ create }: { create?: boolean }) {
 
   const url = `/api/info/${card.category}`;
 
-  const [title, setTitle] = useState(card.title);
-  const [subtitle, setSubtitle] = useState(card.subtitle);
-  const [content, setContent] = useState<string | null>(card.content ?? null);
+  const [title, setTitle] = useState(getLocalizedText(card.title, 'ua'));
+  const [titleEn, setTitleEn] = useState(getLocalizedText(card.title, 'en'));
+
+  const [subtitle, setSubtitle] = useState(getLocalizedText(card.subtitle, 'ua'));
+  const [subtitleEn, setSubtitleEn] = useState(getLocalizedText(card.subtitle, 'en'));
+
+  const [content, setContent] = useState<string | null>(getLocalizedText(card.content, 'ua'));
+  const [contentEn, setContentEn] = useState<string | null>(getLocalizedText(card.content, 'en'));
+
   const [image, setImage] = useState(card.image);
   const [category, setCategory] = useState(card.category ?? '');
   const [subcategory, setSubcategory] = useState<string | null>(card.subcategory ?? null);
@@ -114,7 +125,14 @@ function CardEditorPage({ create }: { create?: boolean }) {
 
   const handleSave = () => {
     updateInfo(
-      {...card, title, subtitle, content, subcategory, category},
+      {
+        ...card, 
+        title: { ua: title, en: titleEn },
+        subtitle: { ua: subtitle, en: subtitleEn },
+        content: { ua: content || "", en: contentEn || "" }, 
+        subcategory, 
+        category
+      },
       imageFile,
       create || false, url).then((success) => {
       if (success) navigate(-1);
@@ -139,9 +157,11 @@ function CardEditorPage({ create }: { create?: boolean }) {
       // switch to content mode
       setSubcategory(null);
       setContent('');
+      setContentEn(''); 
     } else {
       // switch to menu mode
       setContent(null);
+      setContentEn(null);
       setSubcategory(card.subcategory ?? '');
     }
   };
@@ -172,21 +192,34 @@ function CardEditorPage({ create }: { create?: boolean }) {
           <span>Згенеровано на основі: <FontAwesomeIcon icon={faChain}/> <a href={card.resource}>{card.resource}</a></span>
           </div>
         }
+        
         <div>
-          <label title="Основна назва картки">Назва:</label>
+          <label title="Основна назва картки">Назва (UA):</label>
           <input
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder="Введіть назву"
+            placeholder="Введіть назву українською"
+          />
+          <label title="Назва англійською" style={{ marginTop: '10px' }}>Назва (EN):</label>
+          <input
+            value={titleEn}
+            onChange={(e) => setTitleEn(e.target.value)}
+            placeholder="Enter title in English"
           />
         </div>
 
         <div>
-          <label title="Додаткова інформація під основним заголовком">Підзаголовок:</label>
+          <label title="Додаткова інформація під основним заголовком">Підзаголовок (UA):</label>
           <input
             value={subtitle ?? ""}
             onChange={(e) => setSubtitle(e.target.value)}
-            placeholder="Введіть підзаголовок"
+            placeholder="Введіть підзаголовок українською"
+          />
+          <label title="Додаткова інформація під основним заголовком">Підзаголовок (EN):</label>
+          <input
+            value={subtitleEn}
+            onChange={(e) => setSubtitleEn(e.target.value)}
+            placeholder="Введіть підзаголовок англійською"
           />
         </div>
 
@@ -196,7 +229,7 @@ function CardEditorPage({ create }: { create?: boolean }) {
             value={category}
             list="category-suggestions"
             onChange={(e) => setCategory(e.target.value)}
-            placeholder="Введіть підзаголовок"
+            placeholder="Введіть категорію"
           />
           <datalist id="category-suggestions">
             {availableSubcategories.map((item) => (<option key={item} value={item} />))}
@@ -211,9 +244,23 @@ function CardEditorPage({ create }: { create?: boolean }) {
           />
         ) : (
           <div>
+            <label>Контент (UA):</label>
             <Editor
               value={content ?? ''}
               onChange={evt => setContent(evt.target.value)}
+              containerProps={{
+                style: {
+                  resize: 'vertical',
+                  minHeight: '500px',
+                  marginBottom: '20px'
+                }
+              }}
+            />
+            
+            <label>Контент (EN):</label>
+             <Editor
+              value={contentEn ?? ''}
+              onChange={evt => setContentEn(evt.target.value)}
               containerProps={{
                 style: {
                   resize: 'vertical',
@@ -259,7 +306,3 @@ function CardEditorPage({ create }: { create?: boolean }) {
 }
 
 export default CardEditorPage;
-
-
-
-

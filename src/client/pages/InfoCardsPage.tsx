@@ -9,6 +9,7 @@ import { useTranslation } from "react-i18next";
 import { loadCategory } from "../lib/loaders";
 import { logItemShown } from "../lib/firebase";
 import DOMPurify from "dompurify";
+import { getLocalizedText } from "../lib/localization";
 
 type CardsListProps = {
   cards: InfoCard[];
@@ -42,41 +43,55 @@ function loadSubItems(card: CardWithSubItems | null, update: (i: CardWithSubItem
 function InfosList({ cards, active, onSelect }: CardsListProps) {
   const size = active == null ? CardSize.Full : CardSize.Minimized;
   const partiallyFilled = cards.length < 3;
+  const { i18n } = useTranslation(); 
+
   return (
     <motion.div
       className={"info-cards" + (size === CardSize.Minimized ? " minimized" : "") + (partiallyFilled ? " partially-filled" : "")}
       transition={{ duration: 0.6, ease: "easeInOut" }}
     >
-      {cards.map((info) => (
-        <CardButton
-          key={info.id}
-          title={info.title}
-          subtitle={info.subtitle}
-          image={info.image}
-          size={size}
-          active={info.id === active?.id}
-          onClick={() => {
-            // ignore clicks on empty cards
-            if (info.content || info.subcategory) { 
-              onSelect(info) 
-            } 
-          }}
-          empty={!info.content && !info.subcategory}
-        />
-      ))}
+      {cards.map((info) => {
+        const title = getLocalizedText(info.title, i18n.language);
+        const subtitle = getLocalizedText(info.subtitle, i18n.language);
+        const contentVal = getLocalizedText(info.content, i18n.language);
+        
+        const hasContent = !!contentVal;
+
+        return (
+          <CardButton
+            key={info.id}
+            title={title}     
+            subtitle={subtitle}
+            image={info.image}
+            size={size}
+            active={info.id === active?.id}
+            onClick={() => {
+              // ignore clicks on empty cards
+              if (hasContent || info.subcategory) { 
+                onSelect(info) 
+              } 
+            }}
+            empty={!hasContent && !info.subcategory}
+          />
+        );
+      })}
     </motion.div>
   );
 }
 
 function ActiveInfo({ info, onClose }: { info: CardWithSubItems; onClose: () => void }) {
   const [activeInfo, setActiveInfo] = useState<CardWithSubItems | null>(info);
+  const { i18n } = useTranslation();
 
   useEffect(() => setActiveInfo(info), [info]);
 
   const renderContent = () => {
     if (!activeInfo?.content) return null;
 
-    const decoded = decodeHtml(activeInfo.content);
+    const localizedContent = getLocalizedText(activeInfo.content, i18n.language);
+    if (!localizedContent) return null;
+
+    const decoded = decodeHtml(localizedContent);
     const safeHtml = DOMPurify.sanitize(decoded);
 
     return <div dangerouslySetInnerHTML={{ __html: safeHtml }} />;
@@ -88,7 +103,7 @@ function ActiveInfo({ info, onClose }: { info: CardWithSubItems; onClose: () => 
         <InfosList cards={info.subItems ?? []} onSelect={setActiveInfo} active={activeInfo === info ? null : activeInfo} />
       ) : null}
 
-      {activeInfo && activeInfo.content && (
+      {activeInfo && getLocalizedText(activeInfo.content, i18n.language) && (
         <div className="active-info">
           <CloseButton onClick={onClose} />
           <section>
@@ -100,7 +115,6 @@ function ActiveInfo({ info, onClose }: { info: CardWithSubItems; onClose: () => 
   );
 }
 
-// Generic Info cards page that able to display any category of info cards with sub categories
 function InfoCardsPage({ title }: InfoCardsPageProps) {
   const cards = useLoaderData() as CardWithSubItems[];
   const { t } = useTranslation();

@@ -85,6 +85,7 @@ cards.put("/:category/:id", validateCategory, rejectInvalid, authorized, singleI
   if (!oldCard) {
       return res.status(404).json({ error: "Картку не знайдено" });
   }
+
   
   const ALLOWED_FOLDERS = new Set(['centers', 'rectorat', 'subtitles']);
   const subfolder = ALLOWED_FOLDERS.has(req.params.category) ? req.params.category : null;
