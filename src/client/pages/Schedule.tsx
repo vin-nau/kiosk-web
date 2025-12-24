@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { motion } from "motion/react";
-import type { MkrEvent, MkrGroup, Chair, Teachers } from "../../shared/models";
+import type { MkrEvent, MkrGroup, Chair, Teacher } from "../../shared/models";
 import './Schedule.css';
 import { 
   getFacultyGroups, getFaculties, getFacultyChairs, getGroupSchedule, getCourseName, getLessonHours,
@@ -24,7 +24,7 @@ type GenericItem = {
 
 const lessonHours = getLessonHours();
 
-function DetailsContent({ parentId, mode, onClose }: { parentId: string | number, mode: ScheduleMode, onClose: () => void }) {
+function DetailsContent({ parentId, mode }: { parentId: string | number, mode: ScheduleMode }) {
   const [loadingChairs, setLoadingChairs] = useState<boolean>(false);
   const [loadingSchedule, setLoadingSchedule] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -36,8 +36,8 @@ function DetailsContent({ parentId, mode, onClose }: { parentId: string | number
 
   const [chairs, setChairs] = useState<Chair[] | null>(null);
   const [activeChair, setActiveChair] = useState<Chair | null>(null);
-  const [teachers, setTeachers] = useState<Teachers[] | null>(null);
-  const [currentTeacher, setCurrentTeacher] = useState<Teachers | null>(null);
+  const [teachers, setTeachers] = useState<Teacher[] | null>(null);
+  const [currentTeacher, setCurrentTeacher] = useState<Teacher | null>(null);
 
   const [currentSchedule, setCurrentSchedule] = useState<MkrEvent[] | null>(null);
 
@@ -103,90 +103,87 @@ function DetailsContent({ parentId, mode, onClose }: { parentId: string | number
   }, [currentGroup, currentTeacher, parentId, mode, activeChair]);
 
   return (
-    <div className="active-info"> 
-        <div>
-          {mode === 'students' && groups && (
-            <>
-                <div className="courses">
-                  {Array.from(groups.keys()).sort().map((course) => (
-                    <CardButton key={course} title={getCourseName(course)} size={CardSize.Micro}
-                      active={activeCourse === course} onClick={() => setActiveCourse(course)}
-                    />
-                  ))}
-                </div>
-                
-                <div className="groups-schedule">
-                    {courseGroups && (
-                        <div className="groups">
-                        {courseGroups.map((group) => (
-                            <CardButton key={group.id} title={group.name} size={CardSize.Micro}
-                            active={currentGroup?.id === group.id} onClick={() => setCurrentGroup(group)}
-                            />
-                        ))}
-                        </div>
-                    )}
-                    
-                    <div className="schedule-wrapper-bounded">
-                        {loadingSchedule && <Loader />}
-                        {!loadingSchedule && currentSchedule && (
-                            <div className="schedule-container">
-                                <GroupSchedule schedule={currentSchedule} lessonHours={lessonHours} />
-                            </div>
-                        )}
-                        <ErrorOverlay error={error} />
-                    </div>
-                </div>
-            </>
-          )}
-
-          {mode === 'teachers' && (
-             <div className="teacher-flow-container">
-                
-                {loadingChairs && <div style={{width:'100%', display:'flex', justifyContent:'center'}}><Loader/></div>}
-                
-                {chairs && (
-                   <div className={activeChair ? "teacher-slider" : "teacher-grid"}>
-                      {chairs.map((chair) => (
-                        <CardButton
-                          key={chair.id}
-                          title={chair.name}
-                          size={activeChair ? CardSize.Minimized : CardSize.Full} 
-                          active={activeChair?.id === chair.id}
-                          image={chair.image} 
-                          onClick={() => setActiveChair(chair)}
+    <div className={ activeChair ? '' : 'active-info' }> 
+      {mode === 'students' && groups && (
+        <>
+            <div className="courses">
+              {Array.from(groups.keys()).sort().map((course) => (
+                <CardButton key={course} title={getCourseName(course)} size={CardSize.Micro}
+                  active={activeCourse === course} onClick={() => setActiveCourse(course)}
+                />
+              ))}
+            </div>
+            
+            <div className="groups-schedule">
+                {courseGroups && (
+                    <div className="groups">
+                    {courseGroups.map((group) => (
+                        <CardButton key={group.id} title={group.name} size={CardSize.Micro}
+                        active={currentGroup?.id === group.id} onClick={() => setCurrentGroup(group)}
                         />
-                      ))}
-                   </div>
+                    ))}
+                    </div>
                 )}
-
-                {activeChair && teachers && (
-                   <div className="teacher-slider fade-in">
-                       {teachers.map((teacher) => (
-                         <CardButton
-                           key={teacher.id}
-                           title={teacher.name}
-                           size={CardSize.Minimized} 
-                           active={currentTeacher?.id === teacher.id}
-                           onClick={() => setCurrentTeacher(teacher)}
-                         />
-                       ))}
-                   </div>
-                )}
-
-                <div className="schedule-wrapper-bounded" style={{ marginTop: '10px' }}>
+                
+                <div className="schedule-wrapper-bounded">
                     {loadingSchedule && <Loader />}
-                    
                     {!loadingSchedule && currentSchedule && (
-                        <div className="schedule-container fade-in">
-                             <GroupSchedule schedule={currentSchedule} lessonHours={lessonHours} />
+                        <div className="schedule-container">
+                            <GroupSchedule schedule={currentSchedule} lessonHours={lessonHours} />
                         </div>
                     )}
                     <ErrorOverlay error={error} />
                 </div>
-             </div>
-          )}
+            </div>
+        </>
+      )}
 
-        </div>
+      {mode === 'teachers' && (
+          <div className="teacher-flow-container">
+            
+            {loadingChairs && <div style={{ display:'flex', justifyContent:'center'}}><Loader/></div>}
+            
+            {chairs && (
+                <div className={activeChair ? "teacher-slider" : "teacher-grid"}>
+                  {chairs.map((chair) => (
+                    <CardButton
+                      key={chair.id}
+                      title={chair.name}
+                      size={activeChair ? CardSize.Minimized : CardSize.Full} 
+                      active={activeChair?.id === chair.id}
+                      image={chair.image} 
+                      onClick={() => setActiveChair(chair)}
+                    />
+                  ))}
+                </div>
+            )}
+
+            {activeChair && teachers && (
+                <div className="teacher-slider fade-in">
+                    {teachers.map((teacher) => (
+                      <CardButton
+                        key={teacher.id}
+                        title={teacher.name}
+                        size={CardSize.Minimized} 
+                        active={currentTeacher?.id === teacher.id}
+                        onClick={() => setCurrentTeacher(teacher)}
+                      />
+                    ))}
+                </div>
+            )}
+
+            <div className="schedule-wrapper-bounded" style={{ marginTop: '10px' }}>
+                {loadingSchedule && <Loader />}
+                
+                {!loadingSchedule && currentSchedule && (
+                    <div className="schedule-container fade-in">
+                          <GroupSchedule schedule={currentSchedule} lessonHours={lessonHours} />
+                    </div>
+                )}
+                <ErrorOverlay error={error} />
+            </div>
+          </div>
+      )}
     </div>
   );
 }
@@ -231,8 +228,7 @@ function GenericList({ items, activeId, onSelect, mode, switchPane }: GenericLis
           <DetailsContent 
             key={activeId}
             parentId={activeId} 
-            mode={mode} 
-            onClose={() => onSelect({id: activeId, name: ''})} 
+            mode={mode}
           />
       )}
     </>
@@ -292,7 +288,7 @@ function Schedule() {
       
       {activeItem ? <></> : 
         <>
-          <h1>{t('title.schedule')}</h1>          
+          <h1>{ activeMode === 'students' ? t('title.schedule_students') : t('title.schedule_teachers')}</h1>
         </>
       }
 

@@ -1,6 +1,5 @@
 .schedule-page {
   height: 100%;
-  position: relative;
 }
 
 .info-cards {
@@ -80,11 +79,9 @@
   flex-wrap: nowrap;
   overflow-x: auto;
   overflow-y: hidden;
-  width: 100%;
   gap: 16px; 
   padding: 1em 0.5em 0em 1em; 
   align-items: flex-start; 
-  
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
@@ -133,8 +130,8 @@
 
 .schedule-page .schedule-modes-container {
   position: absolute;
-  top: 0.6em;
-  right: 0.5em;
+  bottom: 3em;
+  right: 1em;
 }
 
 .schedule-page .schedule-modes {
@@ -142,22 +139,22 @@
   flex-direction: row;
   gap: 0.9em;
   position: relative;
-  padding: 0.5em 0.7em;
+  padding: 0.3em 0.6em;
   background-color: var(--background-dark);
-  border-radius: 1em;
-  font-size: 1.2em;
+  border-radius: 1.5em;
+  font-size: 1.5em;
   z-index: 3;
 }
 
 .schedule-page .schedule-modes .glider {
   position: absolute;
   top: 0.2em;
-  width: 1.9em;
+  width: 1.85em;
   left: 0.2em;
   bottom: 0.2em;
 	background-color: var(--foreground);
 	z-index: 1;
-	border-radius: 1rem; 
+	border-radius: 1.5rem; 
 	transition: 0.25s ease-out;
 }
 

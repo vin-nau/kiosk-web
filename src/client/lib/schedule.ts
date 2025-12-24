@@ -1,5 +1,5 @@
 import type { Faculty, LessonTime, MkrApiDictionary, MkrEvent, MkrGroup } from "../../shared/models";
-import type { Chair, Teachers } from "../../shared/models"; 
+import type { Chair, Teacher } from "../../shared/models"; 
 // @ts-ignore
 import cache from "js-cache";
 import config from "./config";
@@ -165,15 +165,15 @@ async function getChairs(): Promise<Chair[]> {
   return itemsWithImages;
 }
 
-async function getChairTeachers(chairId: number): Promise<Teachers[]> {
+async function getChairTeachers(chairId: number): Promise<Teacher[]> {
   const cached = localCache.get(`chair-${chairId}-teachers`);
-  if (cached) return cached as Teachers[];
+  if (cached) return cached as Teacher[];
 
   const resp = await fetch(`${config.mkrApiUrl}/structures/0/chairs/${chairId}/teachers`);
   if (!resp.ok) throw new Error(`Failed to fetch teachers`);
 
-  const teachers = await resp.json() as Teachers[];
-  teachers.sort((a, b) => a.name.localeCompare(b.name));
+  const teachers = await resp.json() as Teacher[];
+  teachers.sort((a, b) => a.name.localeCompare(b.name))
 
   localCache.set(`chair-${chairId}-teachers`, teachers);
   return teachers;

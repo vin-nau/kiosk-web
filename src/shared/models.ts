@@ -41,7 +41,7 @@ export type Chair = {
   image: string;
 }
 
-export type Teachers = {
+export type Teacher = {
   id: number;
   name: string
 }
