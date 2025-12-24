@@ -1,5 +1,5 @@
 import type { Faculty, LessonTime, MkrApiDictionary, MkrEvent, MkrGroup } from "../../shared/models";
-import type { Chairs, Teachers } from "../../shared/models"; 
+import type { Chair, Teachers } from "../../shared/models"; 
 // @ts-ignore
 import cache from "js-cache";
 import config from "./config";
@@ -18,11 +18,8 @@ const facultyImages: Map<string, string> = new Map([
   ['5',  '/img/faculties/economics.png'], //Економіки
   ['42', '/img/faculties/finances.png'], //Обліку та аудиту
   ['6',  '/img/faculties/management.png'], //Менеджменту
-   ['2',  '/img/faculties/plants.png'], // Технології виробництва
+  ['2',  '/img/faculties/plants.png'], // Технології виробництва
   ['57', '/img/faculties/veterinarian.png'], // Ветеринарної медицини
-  
-  
-
   // ['46', '/img/faculties/management.png'],  // Військова підготовка
   // ['3',  '/img/faculties/management.png'],  // Інститут післядипломної освіти
   // ['4',  '/img/faculties/management.png'], // Аспірантура
@@ -34,7 +31,6 @@ const chairImages: Map<string, string> = new Map([
   ['1',   '/img/faculties/agro.png'], // Ботаніки, генетики та захисту рослин
   ['2',   '/img/faculties/agro.png'], // Землеробства, ґрунтознавства та агрохімії
   ['4',   '/img/faculties/agro.png'], // Рослинництва та садівництва
-
 
   //Екології
   ['6',   '/img/faculties/ecology.png'], // Лісового та садово-паркового господарства
@@ -99,22 +95,13 @@ const chairImages: Map<string, string> = new Map([
 
 const facultyChairs: Record<string, string[]> = {
   '1': ['1', '2', '4', '3', '6'], // Агрономія 
-
   '111': ['3', '6'], //Екології немає в МКР
-
   '7': ['181', '147', '17', '14', '29', '220', '219', '218', '110'], //Інженерний
-
   '5': ['143', '182', '165', '20', '217', '112'], // Економіка 
-
   '42': ['122', '28', '76', '26'], // Фінанси 
-
   '6': ['145', '23', '18', '21', '24'], // Менеджмент
-
   '2': ['211', '12', '214', '7', '11', '213', '212'], // технології виробництва 
-
-  // Ветеринарія 
-  '57': ['215', '10', '216'], // Ветеринарія 
-  
+  '57': ['215', '10', '216'], // Ветеринарія   
 };
 
 async function getFaculties(): Promise<Faculty[]> {
@@ -141,7 +128,7 @@ async function getFaculties(): Promise<Faculty[]> {
   return itemsWithImages;
 }
 
-async function getFacultyChairs(facultyId: string): Promise<Chairs[]> {
+async function getFacultyChairs(facultyId: string): Promise<Chair[]> {
   const allChairs = await getChairs()
 
   const allowedIds = facultyChairs[facultyId];
@@ -149,12 +136,12 @@ async function getFacultyChairs(facultyId: string): Promise<Chairs[]> {
   if (!allowedIds) {
     return [];
   }
-  return allChairs.filter(chair => allowedIds.includes(String(chair.id)));
+  return allChairs.filter(chair => allowedIds.includes(chair.id));
 }
 
-async function getChairs(): Promise<Chairs[]> {
+async function getChairs(): Promise<Chair[]> {
   const cached = localCache.get('chairs-list');
-  if (cached) return cached as Chairs[];
+  if (cached) return cached as Chair[];
 
   const resp = await fetch(`${config.mkrApiUrl}/structures/0/chairs`);
   const items: MkrApiDictionary[] = await resp.json();
@@ -169,7 +156,7 @@ async function getChairs(): Promise<Chairs[]> {
           ...c, 
           name, 
           image: chairImages.get(c.id) 
-      }) as Chairs;
+      }) as Chair;
     });
 
   itemsWithImages.sort((a, b) => a.name.localeCompare(b.name));
@@ -179,39 +166,39 @@ async function getChairs(): Promise<Chairs[]> {
 }
 
 async function getChairTeachers(chairId: number): Promise<Teachers[]> {
-    const cached = localCache.get(`chair-${chairId}-teachers`);
-    if (cached) return cached as Teachers[];
-  
-    const resp = await fetch(`${config.mkrApiUrl}/structures/0/chairs/${chairId}/teachers`);
-    if (!resp.ok) throw new Error(`Failed to fetch teachers`);
-  
-    const teachers = await resp.json() as Teachers[];
-    teachers.sort((a, b) => a.name.localeCompare(b.name));
-  
-    localCache.set(`chair-${chairId}-teachers`, teachers);
-    return teachers;
+  const cached = localCache.get(`chair-${chairId}-teachers`);
+  if (cached) return cached as Teachers[];
+
+  const resp = await fetch(`${config.mkrApiUrl}/structures/0/chairs/${chairId}/teachers`);
+  if (!resp.ok) throw new Error(`Failed to fetch teachers`);
+
+  const teachers = await resp.json() as Teachers[];
+  teachers.sort((a, b) => a.name.localeCompare(b.name));
+
+  localCache.set(`chair-${chairId}-teachers`, teachers);
+  return teachers;
 }
 
 async function getFacultyGroups(facultyId: string): Promise<Map<number, MkrGroup[]>> {
-    const cached = localCache.get(`faculty-${facultyId}-groups`);
-    if (cached) return cached as Map<number, MkrGroup[]>;
+  const cached = localCache.get(`faculty-${facultyId}-groups`);
+  if (cached) return cached as Map<number, MkrGroup[]>;
 
-    const resp = await fetch(`${config.mkrApiUrl}/structures/0/faculties/${facultyId}/groups`);
-    if (!resp.ok) throw new Error(`Failed to fetch groups`);
-    
-    const groups = await resp.json() as MkrGroup[];
-    
-    const groupsByCourse = groups.reduce((acc, group) => {
-      const course = group.course;
-      if(!acc.has(course)) acc.set(course, []);
-      acc.get(course)!.push(group);
-      return acc;
-    }, new Map<number, MkrGroup[]>());
+  const resp = await fetch(`${config.mkrApiUrl}/structures/0/faculties/${facultyId}/groups`);
+  if (!resp.ok) throw new Error(`Failed to fetch groups`);
+  
+  const groups = await resp.json() as MkrGroup[];
+  
+  const groupsByCourse = groups.reduce((acc, group) => {
+    const course = group.course;
+    if(!acc.has(course)) acc.set(course, []);
+    acc.get(course)!.push(group);
+    return acc;
+  }, new Map<number, MkrGroup[]>());
 
-    groupsByCourse.forEach((groups) => groups.sort((a, b) => a.name.localeCompare(b.name)));
+  groupsByCourse.forEach((groups) => groups.sort((a, b) => a.name.localeCompare(b.name)));
 
-    localCache.set(`faculty-${facultyId}-groups`, groupsByCourse);
-    return groupsByCourse;
+  localCache.set(`faculty-${facultyId}-groups`, groupsByCourse);
+  return groupsByCourse;
 }
 
 async function getGroupSchedule(facultyId: string, course: number, groupId: string): Promise<MkrEvent[]> {
@@ -224,12 +211,12 @@ async function getGroupSchedule(facultyId: string, course: number, groupId: stri
 }
 
 async function getTeacherSchedule(chairId: number, teacherId: number): Promise<MkrEvent[]> {
-    const cached = localCache.get(`chair-${chairId}-teacher-${teacherId}-schedule`);
-    if (cached) return cached as MkrEvent[];
-    const resp = await fetch(`${config.mkrApiUrl}/structures/0/chairs/${chairId}/teachers/${teacherId}/schedule`);
-    const data = await resp.json() as MkrEvent[];
-    localCache.set(`chair-${chairId}-teacher-${teacherId}-schedule`, data);
-    return data;
+  const cached = localCache.get(`chair-${chairId}-teacher-${teacherId}-schedule`);
+  if (cached) return cached as MkrEvent[];
+  const resp = await fetch(`${config.mkrApiUrl}/structures/0/chairs/${chairId}/teachers/${teacherId}/schedule`);
+  const data = await resp.json() as MkrEvent[];
+  localCache.set(`chair-${chairId}-teacher-${teacherId}-schedule`, data);
+  return data;
 }
 
 function getCourseName(course: number): string {
@@ -237,7 +224,7 @@ function getCourseName(course: number): string {
 }
 
 const lessonHours = [
-    { time: "8:00",  end: "9:20", name: '1 Пара' },
+    { time: "8:00",  end: "9:20",  name: '1 Пара' },
     { time: "9:30",  end: "10:50", name: '2 Пара' },
     { time: "11:30", end: "12:50", name: '3 Пара' },
     { time: "13:10", end: "14:30", name: '4 Пара' },
@@ -246,6 +233,7 @@ const lessonHours = [
     { time: "17:40", end: "19:00", name: '7 Пара' },
     { time: "19:30", end: "20:50", name: '8 Пара' },
 ];
+
 function getLessonHours() { return lessonHours; }
 
 export { 

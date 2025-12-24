@@ -35,7 +35,7 @@ export type MkrGroup = {
   course: number;
 }
 
-export type Chairs = {
+export type Chair = {
   id: string;
   name: string;
   image: string;

@@ -12,6 +12,7 @@
 
 :root {
   --background: #06231C;
+  --background-dark: #051F19;
   --foreground: #E8EEF2DF;
   --header-background: rgba(155,184,175,0.17);
   --footer-background: #333;
