@@ -35,13 +35,13 @@ export type MkrGroup = {
   course: number;
 }
 
-export type Chairs = {
+export type Chair = {
   id: string;
   name: string;
   image: string;
 }
 
-export type Teachers = {
+export type Teacher = {
   id: number;
   name: string
 }

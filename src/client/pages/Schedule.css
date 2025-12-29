@@ -27,19 +27,6 @@
   justify-content: center;
 }
 
-.active-info {
-  width: 100%;
-}
-
-.active-info .content {
-  width: 100%;
-  padding: 0;
-}
-
-.active-info section {
-  width: 100%;
-}
-
 .courses {
   display: flex;
   gap: 16px;
@@ -49,7 +36,7 @@
   scrollbar-width: none; 
   padding: 12px 12px 12px 0;
   scroll-snap-type: x mandatory;
-  justify-content: flex-start;
+  justify-content: center;
   margin-bottom: 16px;
 }
 
@@ -79,31 +66,22 @@
   width: 100%;
 }
 
-.content {
-  margin-top: 1em;
-}
-
 .teacher-flow-container {
   display: flex;
   flex-direction: column;
-  width: 100%;
-  gap: 10px; 
   margin-top: 0;
   overflow: hidden; 
 }
 
 .teacher-slider {
-  display: flex !important;
-  flex-direction: row !important;
-  flex-wrap: nowrap !important; 
-  overflow-x: auto !important;  
-  overflow-y: hidden !important;
-  
-  width: 100%;
-  gap: 15px; 
-  padding: 10px 5px 15px 5px; 
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  overflow-y: hidden;
+  gap: 16px; 
+  padding: 1em 0.5em 0em 1em; 
   align-items: flex-start; 
-  
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
@@ -150,3 +128,51 @@
   animation: fadeIn 0.5s ease-in-out;
 }
 
+.schedule-page .schedule-modes-container {
+  position: absolute;
+  bottom: 3em;
+  right: 1em;
+}
+
+.schedule-page .schedule-modes {
+  display: inline-flex;
+  flex-direction: row;
+  gap: 0.9em;
+  position: relative;
+  padding: 0.3em 0.6em;
+  background-color: var(--background-dark);
+  border-radius: 1.5em;
+  font-size: 1.5em;
+  z-index: 3;
+}
+
+.schedule-page .schedule-modes .glider {
+  position: absolute;
+  top: 0.2em;
+  width: 1.85em;
+  left: 0.2em;
+  bottom: 0.2em;
+	background-color: var(--foreground);
+	z-index: 1;
+	border-radius: 1.5rem; 
+	transition: 0.25s ease-out;
+}
+
+.schedule-page .schedule-modes a {
+  z-index: 2;
+}
+
+.schedule-page .schedule-modes a.active {
+  color: var(--background);
+}
+
+.schedule-page .faculties-stripe {
+  display: flex;
+  flex-direction: row;
+}
+
+.schedule-page .stripe-switch-pane {
+  padding-right: 0.5em;
+  padding-top: 0.6em;
+  background-color: var(--sub-menu-background);
+}

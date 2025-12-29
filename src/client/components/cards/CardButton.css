@@ -64,6 +64,10 @@
   text-decoration-style: solid;
 }
 
+.info-card.micro .card-text {
+  text-align: left;
+}
+
 .info-card.active {
   background: var(--cards-backround-active);
 }
