@@ -27,9 +27,9 @@ async function loadArticleContents(link: string): Promise<string> {
   return content;
 }
 
-async function parseCurrentNewsPage(): Promise<InfoCard[]> {
+async function parseCurrentNewsPage(targetUrl: string): Promise<InfoCard[]> {
   try {
-    const response = await fetch(BASE_URL, { headers: { "User-Agent": "Mozilla/5.0" }});
+    const response = await fetch(targetUrl, { headers: { "User-Agent": "Mozilla/5.0" }});
 
     if (!response.ok) {
       throw new Error(`Не вдалося завантажити список новин: ${response.status}`);
@@ -92,16 +92,54 @@ export async function syncNewsArticle(info: InfoCard): Promise<InfoCard> {
 // Load news from the public site and save to the database
 // If the article already exists, it will be skipped
 export async function updateNews(): Promise<void> {
-  const articles = await parseCurrentNewsPage();
+  const pages = [1, 2, 3, 4];
 
-  Promise.all(articles.map(async (article) => {
-    const existing = await infoCards.get(article.id);
-
-    if (!existing) {      
-      await infoCards.create(article);
-      console.log(`Додано новину: ${article.title}`);
+  const urls = pages.map(page => {
+    try {
+      const urlObj = new URL(BASE_URL);
+      urlObj.searchParams.set('page', page.toString());
+      return urlObj.toString()
+    } catch (e) {
+        return `${BASE_URL}?page=${page}`
     }
-  })).catch((err) => {
-    console.error(`Помилка при оновленні новин:`, err);
-  });
+  })
+
+  const result = await Promise.all(
+    urls.map(url => parseCurrentNewsPage(url))
+  )
+
+  const articles = result.flat();
+
+  for (let i = 0; i < articles.length; i++) {
+    const article = articles[i];
+    
+    article.position = i; 
+
+    try {
+      const existing = await infoCards.get(article.id);
+
+      if (existing && 
+          existing.title === article.title &&
+          existing.content === article.content &&
+          existing.image === article.image &&
+          existing.position === article.position 
+      ) {
+        continue;
+      }
+
+      if (existing) {
+        await infoCards.update({
+            ...existing, 
+            ...article,
+            position: i, 
+            published: existing.published 
+        });
+      } else {
+         await infoCards.create(article);
+         console.log(`Додано: ${article.title} (pos: ${i})`);
+      }
+    } catch(err) { 
+      console.error(`Помилка при оновленні новин:`, err);
+    };
+  }
 }

@@ -14,7 +14,7 @@ if (!process.env.ADMIN_EMAILS) {
 const config = {
   baseUrl: process.env.VITE_BASE_URL ?? '/',
   admins: (process.env.ADMIN_EMAILS ?? '').split(',').map(email => email.trim()).filter(email => email.length > 0),
-  newsBaseUrl: process.env.NEWS_BASE_URL ?? 'https://vsau.org/novini',
+  newsBaseUrl: process.env.NEWS_BASE_URL ?? 'https://vsau.org/novini?page=1',
   rectoratBaseUrl: process.env.RECTORAT_BASE_URL ?? 'https://vsau.org/pro-universitet/rektorat',
   centersBaseUrl: process.env.CENTERS_BASE_URL ?? 'https://vsau.org/pro-universitet/strukturni-pidrozdili',
   secureCookie: (process.env.SECURE_SESSION ?? (process.env.NODE_ENV === 'production').toString()) === 'true',
