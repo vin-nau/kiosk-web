@@ -82,7 +82,8 @@ function CardEditorPage({ create }: { create?: boolean }) {
   const navigate = useNavigate();
   const card = useLoaderData() as InfoCard;
 
-  const url = `/api/info/${card.category}`;
+  const params = useParams(); 
+  const urlCategory = params.category;
 
   const [title, setTitle] = useState(getLocalizedText(card.title, 'ua'));
   const [titleEn, setTitleEn] = useState(getLocalizedText(card.title, 'en'));
@@ -94,7 +95,7 @@ function CardEditorPage({ create }: { create?: boolean }) {
   const [contentEn, setContentEn] = useState<string | null>(getLocalizedText(card.content, 'en'));
 
   const [image, setImage] = useState(card.image);
-  const [category, setCategory] = useState(card.category ?? '');
+  const [category, setCategory] = useState(card.category ?? urlCategory ?? '');
   const [subcategory, setSubcategory] = useState<string | null>(card.subcategory ?? null);
   const [imageFile, setImageFile] = useState<File & PreviewFile | null>(null);
   const [availableSubcategories, setAvailableSubcategories] = useState<string[]>([]);
@@ -124,6 +125,15 @@ function CardEditorPage({ create }: { create?: boolean }) {
   );
 
   const handleSave = () => {
+    const currentCategory = category || urlCategory;
+    
+    if (!currentCategory) {
+        toast.error("Помилка: Не вдалося визначити категорію!");
+        return;
+    }
+
+    const targetUrl = `/api/info/${currentCategory}`;
+    
     updateInfo(
       {
         ...card, 
@@ -131,10 +141,10 @@ function CardEditorPage({ create }: { create?: boolean }) {
         subtitle: { ua: subtitle, en: subtitleEn },
         content: { ua: content || "", en: contentEn || "" }, 
         subcategory, 
-        category
+        category: currentCategory
       },
       imageFile,
-      create || false, url).then((success) => {
+      create || false, targetUrl).then((success) => {
       if (success) navigate(-1);
     });
   }
