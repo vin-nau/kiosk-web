@@ -6,7 +6,6 @@ let app: Promise<FirebaseApp> = new Promise((resolve, reject) => {
   fetch('/api/auth/firebase-config.json')
     .then(res => res.json())
     .then(config => {
-      console.log("Initializing Firebase app with config:", config);
       resolve(initializeApp(config));
     })
     .catch(error => {
