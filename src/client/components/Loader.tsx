@@ -1,4 +1,4 @@
-import ClockLoader from 'react-spinners/ClockLoader';
+import { ClockLoader } from "react-spinners";
 import './Loader.css';
 
 // Loader centered in the page
