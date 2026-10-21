@@ -13,8 +13,7 @@
   --width: 5em;
 }
 
-.schedule {  
-  margin-top: 1em;
+.schedule {
   display: grid;
   grid-template-columns: var(--height) repeat(var(--days), 1fr); /* first column = hours */
   grid-template-rows: var(--width) repeat(10, var(--width)); /* header + time slots */

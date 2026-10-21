@@ -1,4 +1,5 @@
 import admin from "firebase-admin";
+import { getAuth } from "firebase-admin/auth";
 import { type NextFunction, type Request, type Response } from "express";
 
 // Tell Typescript that REquest has a user
@@ -14,7 +15,7 @@ declare module "express-serve-static-core" {
 export async function authorized(req: Request, res: Response, next: NextFunction) {
   try {
     const sessionCookie = req.cookies.session || "";
-    const decoded = await admin.auth().verifySessionCookie(sessionCookie, true);
+    const decoded = await getAuth().verifySessionCookie(sessionCookie, true);
     req.user = decoded;
     next();
   } catch (err) {

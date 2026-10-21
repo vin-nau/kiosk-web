@@ -34,10 +34,9 @@
   overflow-x: auto;
   scroll-behavior: smooth;
   scrollbar-width: none; 
-  padding: 12px 12px 12px 0;
+  padding: 0.5rem 0.5rem 0.5rem 0;
   scroll-snap-type: x mandatory;
   justify-content: center;
-  margin-bottom: 16px;
 }
 
 .groups-schedule {
@@ -120,7 +119,6 @@
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  margin-top: 10px;
 }
 
 .schedule-container {

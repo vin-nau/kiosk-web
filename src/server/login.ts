@@ -1,5 +1,7 @@
 import express, { type Request, type Response } from "express";
 import admin, { type ServiceAccount } from "firebase-admin";
+import { getAuth } from "firebase-admin/auth";
+import { cert, initializeApp } from "firebase-admin/app";
 import fs from "fs";
 import { fileURLToPath } from "url";
 import { dirname, resolve } from "path";
@@ -16,8 +18,8 @@ if (!accountFile) {
 } else {
   const serviceAccount = JSON.parse(fs.readFileSync(accountFile, 'utf8')) as ServiceAccount
 
-  admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount)
+  initializeApp({
+    credential: cert(serviceAccount)
   });
 }
 
@@ -26,7 +28,7 @@ const api = express.Router();
 api.post("/auth", async (req: Request, res: Response) => {
   try {
     const { token } = req.body;
-    const decoded = await admin.auth().verifyIdToken(token);
+    const decoded = await getAuth().verifyIdToken(token);
     
     console.log(`Token verified for ${decoded.email}`); 
 
@@ -37,7 +39,7 @@ api.post("/auth", async (req: Request, res: Response) => {
 
     console.log(`User ${decoded.email} authenticated. Creating ${config.secureCookie ? 'secure' : 'dev' } session cookie`);
 
-    const sessionCookie = await admin.auth().createSessionCookie(token, { expiresIn: config.sessionExpiration });
+    const sessionCookie = await getAuth().createSessionCookie(token, { expiresIn: config.sessionExpiration });
 
     res.cookie("session", 
       sessionCookie, 
